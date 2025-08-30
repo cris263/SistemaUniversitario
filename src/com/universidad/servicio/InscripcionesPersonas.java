@@ -4,7 +4,7 @@ import com.universidad.modelo.Persona;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InscripcionesPersonas implements Servicios {
+public class InscripcionesPersonas {
     private List<Persona> listado;
     
     public InscripcionesPersonas() {
@@ -48,33 +48,6 @@ public class InscripcionesPersonas implements Servicios {
     public void cargarDatos() {
         System.out.println("Cargando datos de personas...");
         // Aquí se podrían cargar datos desde BD o archivo
-    }
-    
-    @Override
-    public String imprimirPosicion(String posicion) {
-        try {
-            int pos = Integer.parseInt(posicion);
-            if (pos >= 0 && pos < listado.size()) {
-                return listado.get(pos).toString();
-            }
-        } catch (NumberFormatException e) {
-            return "Posición inválida";
-        }
-        return "Posición fuera de rango";
-    }
-    
-    @Override
-    public Integer cantidadActual() {
-        return listado.size();
-    }
-    
-    @Override
-    public List<String> imprimirListado() {
-        List<String> resultado = new ArrayList<>();
-        for (Persona persona : listado) {
-            resultado.add(persona.toString());
-        }
-        return resultado;
     }
     
     public List<Persona> getListado() {
