@@ -42,6 +42,26 @@ public class PersonaDAO {
         }
     }
 
+    public void actualizarPersona(Persona persona) throws SQLException {
+    String sql = "UPDATE persona SET nombres = ?, apellidos = ?, email = ? WHERE id = ?";
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setString(1, persona.getNombres());
+        stmt.setString(2, persona.getApellidos());
+        stmt.setString(3, persona.getEmail());
+        stmt.setLong(4, persona.getId());
+
+        int rows = stmt.executeUpdate();
+        if (rows > 0) {
+            System.out.println("Persona actualizada correctamente");
+        } else {
+            System.out.println("No se encontró una persona con el ID: " + persona.getId());
+        }
+    }
+}
+
+
     public List<Persona> obtenerTodasLasPersonas() throws SQLException {
         List<Persona> personas = new ArrayList<>();
         String sql = "SELECT * FROM persona";

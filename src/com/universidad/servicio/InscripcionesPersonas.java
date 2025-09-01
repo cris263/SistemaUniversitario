@@ -66,8 +66,8 @@ public class InscripcionesPersonas {
 
 
     public void actualizar(Persona persona) throws SQLException {
-        personaDAO.eliminarPersona(persona.getId());
-        personaDAO.guardarPersona(persona);
+        personaDAO.actualizarPersona(persona);
+        System.out.println("Persona para actualizar: " + persona.getNombres() + " " + persona.getApellidos());
         for (int i = 0; i < listado.size(); i++) {
             if (listado.get(i).getId() == persona.getId()) {
                 listado.set(i, persona);
@@ -86,12 +86,10 @@ public class InscripcionesPersonas {
         }
     }
     
-    public void cargarDatos() {
+    public List<Persona> cargarDatos() throws SQLException  {
         System.out.println("Cargando datos de personas...");
-        // Aquí se podrían cargar datos desde BD o archivo
-    }
-    
-    public List<Persona> getListado() {
-        return new ArrayList<>(listado);
+        List<Persona> personas = personaDAO.obtenerTodasLasPersonas();
+        return personas;
+
     }
 }
