@@ -50,8 +50,8 @@ public class CursosInscritos implements Servicios {
     public void actualizar(Inscripcion inscripcion) {
         for (int i = 0; i < listado.size(); i++) {
             Inscripcion actual = listado.get(i);
-            if (actual.getCurso().getId().equals(inscripcion.getCurso().getId()) &&
-                actual.getEstudiante().getId().equals(inscripcion.getEstudiante().getId())) {
+            if (actual.getCurso().getId() == inscripcion.getCurso().getId() &&
+                    actual.getEstudiante().getId() == inscripcion.getEstudiante().getId()) {
                 listado.set(i, inscripcion);
                 System.out.println("Inscripción actualizada correctamente");
                 return;
@@ -63,8 +63,8 @@ public class CursosInscritos implements Servicios {
     public void guardarInformacion(Inscripcion inscripcion) {
         boolean encontrado = false;
         for (Inscripcion actual : listado) {
-            if (actual.getCurso().getId().equals(inscripcion.getCurso().getId()) &&
-                actual.getEstudiante().getId().equals(inscripcion.getEstudiante().getId())) {
+            if (actual.getCurso().getId() == inscripcion.getCurso().getId() &&
+                    actual.getEstudiante().getId() == inscripcion.getEstudiante().getId()) {
                 actualizar(inscripcion);
                 encontrado = true;
                 break;

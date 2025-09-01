@@ -7,16 +7,38 @@ import java.util.List;
 
 public class PersonaDAO {
 
-    public void guardarPersona(Persona persona) throws SQLException {
-        String sql = "INSERT INTO persona (id, nombres, apellidos, email) VALUES (?, ?, ?, ?)";
+    /*public void guardarPersona(Persona persona) throws SQLException {
+       String sql = "INSERT INTO persona (id, nombres, apellidos, email) VALUES (?, ?, ?, ?)";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDouble(1, persona.getId());
+            stmt.setLong(1, persona.getId());
             stmt.setString(2, persona.getNombres());
             stmt.setString(3, persona.getApellidos());
             stmt.setString(4, persona.getEmail());
             stmt.executeUpdate();
             System.out.println("Persona guardada correctamente");
+        }
+    }*/
+
+    public void guardarPersona(Persona persona) throws SQLException {
+        String sql = "INSERT INTO persona (nombres, apellidos, email) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, persona.getNombres());
+            stmt.setString(2, persona.getApellidos());
+            stmt.setString(3, persona.getEmail());
+            stmt.executeUpdate();
+
+            // función que trae el id de la h2
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    persona.setId(rs.getLong(1)); // asigna el id a persona
+                }
+            }
+
+            System.out.println("Persona guardada correctamente con ID: " + persona.getId());
         }
     }
 
@@ -28,7 +50,7 @@ public class PersonaDAO {
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Persona persona = new Persona(
-                    rs.getDouble("id"),
+                    rs.getLong("id"),
                     rs.getString("nombres"),
                     rs.getString("apellidos"),
                     rs.getString("email")
@@ -41,11 +63,11 @@ public class PersonaDAO {
         return personas;
     }
 
-    public void eliminarPersona(Double id) throws SQLException {
+    public void eliminarPersona(Long id) throws SQLException {
         String sql = "DELETE FROM persona WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDouble(1, id);
+            stmt.setLong(1, id);
             int rows = stmt.executeUpdate();
             if (rows > 0) {
                 System.out.println("Persona eliminada correctamente");

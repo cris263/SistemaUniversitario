@@ -5,7 +5,7 @@ public class Profesor extends Persona {
     
     public Profesor() {}
     
-    public Profesor(Double id, String nombres, String apellidos, String email, String tipoContrato) {
+    public Profesor(long id, String nombres, String apellidos, String email, String tipoContrato) {
         super(id, nombres, apellidos, email);
         this.tipoContrato = tipoContrato;
     }

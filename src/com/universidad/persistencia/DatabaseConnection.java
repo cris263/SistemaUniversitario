@@ -34,7 +34,7 @@ public class DatabaseConnection {
         // 🔹 Nueva tabla de personas
         String createPersonaTable = """
             CREATE TABLE IF NOT EXISTS persona (
-                id DOUBLE PRIMARY KEY,
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
                 nombres VARCHAR(100) NOT NULL,
                 apellidos VARCHAR(100) NOT NULL,
                 email VARCHAR(100) NOT NULL

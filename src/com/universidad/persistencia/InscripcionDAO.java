@@ -53,7 +53,7 @@ public class InscripcionDAO {
                 
                 // Crear estudiante
                 Estudiante estudiante = new Estudiante();
-                estudiante.setId(rs.getDouble("estudiante_id"));
+                estudiante.setId(rs.getLong("estudiante_id"));
                 estudiante.setNombres(rs.getString("estudiante_nombres"));
                 estudiante.setApellidos(rs.getString("estudiante_apellidos"));
                 estudiante.setEmail(rs.getString("estudiante_email"));

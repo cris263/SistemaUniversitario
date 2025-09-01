@@ -8,7 +8,7 @@ public class Estudiante extends Persona {
     
     public Estudiante() {}
     
-    public Estudiante(Double id, String nombres, String apellidos, String email,
+    public Estudiante(long id, String nombres, String apellidos, String email,
                      Double codigo, Programa programa, Boolean activo, Double promedio) {
         super(id, nombres, apellidos, email);
         this.codigo = codigo;

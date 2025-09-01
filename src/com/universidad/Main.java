@@ -3,6 +3,7 @@ package com.universidad;
 import com.universidad.modelo.Persona;
 import com.universidad.persistencia.DatabaseConnection;
 import com.universidad.persistencia.PersonaDAO;
+import com.universidad.servicio.InscripcionesPersonas;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -12,12 +13,14 @@ import java.util.List;
 
 public class Main extends JFrame {
     private PersonaDAO personaDAO;
+    private InscripcionesPersonas inscripcionesPersonas;
     private JTable tabla;
     private DefaultTableModel modeloTabla;
     private JTextField txtId, txtNombres, txtApellidos, txtEmail;
 
     public Main() {
         personaDAO = new PersonaDAO();
+        inscripcionesPersonas = new InscripcionesPersonas();
 
         setTitle("CRUD Personas");
         setSize(700, 400);
@@ -76,12 +79,13 @@ public class Main extends JFrame {
     private void guardarPersona() {
         try {
             Persona persona = new Persona(
-                Double.parseDouble(txtId.getText()),
+                //Long.parseLong(txtId.getText()),
+                    null,
                 txtNombres.getText(),
                 txtApellidos.getText(),
                 txtEmail.getText()
             ) {};
-            personaDAO.guardarPersona(persona);
+            inscripcionesPersonas.guardarInformacion(persona);
             limpiarCampos();
             cargarPersonas();
         } catch (SQLException ex) {
@@ -92,9 +96,9 @@ public class Main extends JFrame {
     private void eliminarPersona() {
         int fila = tabla.getSelectedRow();
         if (fila >= 0) {
-            Double id = Double.parseDouble(tabla.getValueAt(fila, 0).toString());
+            Long id = Long.parseLong(tabla.getValueAt(fila, 0).toString());
             try {
-                personaDAO.eliminarPersona(id);
+                inscripcionesPersonas.eliminar(id);
                 cargarPersonas();
             } catch (SQLException ex) {
                 mostrarError(ex.getMessage());
@@ -108,7 +112,7 @@ public class Main extends JFrame {
         int fila = tabla.getSelectedRow();
         if (fila >= 0) {
             try {
-                Double id = Double.parseDouble(txtId.getText());
+                Long id = Long.parseLong(txtId.getText());
                 Persona persona = new Persona(
                     id,
                     txtNombres.getText(),
@@ -116,8 +120,7 @@ public class Main extends JFrame {
                     txtEmail.getText()
                 ) {};
                 // actualización simple: eliminar + insertar de nuevo
-                personaDAO.eliminarPersona(id);
-                personaDAO.guardarPersona(persona);
+                inscripcionesPersonas.actualizar(persona);
                 limpiarCampos();
                 cargarPersonas();
             } catch (SQLException ex) {
