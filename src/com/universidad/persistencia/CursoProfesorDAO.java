@@ -7,15 +7,14 @@ import com.universidad.modelo.Curso;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
 
 public class CursoProfesorDAO {
 
     public void guardarCursoProfesor(CursoProfesor cp) throws SQLException {
-        String sql = "INSERT INTO curso_profesor (profesor_id, curso_id, anio, semestre) VALUES (?, ?, ?, ?)";
+        // ✅ Corregido: usar 'profesor' y 'curso' (sin _id)
+        String sql = "INSERT INTO curso_profesor (profesor, curso, anio, semestre) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, cp.getProfesor().getId());
             stmt.setLong(2, cp.getCurso().getId());
@@ -23,14 +22,15 @@ public class CursoProfesorDAO {
             stmt.setInt(4, cp.getSemestre());
 
             stmt.executeUpdate();
-            System.out.println("CursoProfesor guardado: " + cp);
+            System.out.println("✅ CursoProfesor guardado: " + cp);
         }
     }
 
     public void eliminarCursoProfesor(CursoProfesor cp) throws SQLException {
-        String sql = "DELETE FROM curso_profesor WHERE profesor_id = ? AND curso_id = ? AND anio = ? AND semestre = ?";
+        // ✅ Corregido: usar 'profesor' y 'curso' (sin _id)
+        String sql = "DELETE FROM curso_profesor WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, cp.getProfesor().getId());
             stmt.setLong(2, cp.getCurso().getId());
@@ -39,42 +39,188 @@ public class CursoProfesorDAO {
 
             int rows = stmt.executeUpdate();
             if (rows > 0) {
-                System.out.println("CursoProfesor eliminado: " + cp);
+                System.out.println("🗑️ CursoProfesor eliminado: " + cp);
             } else {
-                System.out.println("No se encontró el CursoProfesor: " + cp);
+                System.out.println("⚠️ No se encontró el CursoProfesor: " + cp);
             }
         }
     }
 
-    public List<CursoProfesor> obtenerTodos(List<Profesor> profesores, List<Curso> cursos) throws SQLException {
-        List<CursoProfesor> lista = new ArrayList<>();
-        String sql = "SELECT * FROM curso_profesor";
+    public void actualizarCursoProfesor(CursoProfesor original, CursoProfesor actualizado) throws SQLException {
+        // ✅ Corregido: usar 'profesor' y 'curso' (sin _id)
+        String sql = "UPDATE curso_profesor SET anio = ?, semestre = ? " +
+                "WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, actualizado.getAnio());
+            stmt.setInt(2, actualizado.getSemestre());
+            stmt.setLong(3, original.getProfesor().getId());
+            stmt.setLong(4, original.getCurso().getId());
+            stmt.setInt(5, original.getAnio());
+            stmt.setInt(6, original.getSemestre());
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                System.out.println("✏️ CursoProfesor actualizado: " + actualizado);
+            } else {
+                System.out.println("⚠️ No se encontró el CursoProfesor a actualizar.");
+            }
+        }
+    }
+
+    public List<CursoProfesor> obtenerTodos() throws SQLException {
+        List<CursoProfesor> lista = new ArrayList<>();
+        // ✅ Corregido: JOIN usando los nombres correctos de columnas y tablas
+        String sql = "SELECT cp.profesor, cp.curso, cp.anio, cp.semestre, " +
+                "p.nombres AS profesor_nombres, p.apellidos AS profesor_apellidos, " +
+                "p.email AS profesor_email, pr.tipo_contrato, " +
+                "c.nombre AS curso_nombre, c.activo AS curso_activo, c.programa AS curso_programa " +
+                "FROM curso_profesor cp " +
+                "JOIN profesor pr ON cp.profesor = pr.id " +
+                "JOIN persona p ON pr.id = p.id " +
+                "JOIN curso c ON cp.curso = c.id";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Long profesorId = rs.getLong("profesor_id");
-                Integer cursoId = rs.getInt("curso_id");
-                Integer anio = rs.getInt("anio");
-                Integer semestre = rs.getInt("semestre");
+                // Construir Profesor
+                Profesor profesor = new Profesor(
+                        rs.getLong("profesor"),
+                        rs.getString("profesor_nombres"),
+                        rs.getString("profesor_apellidos"),
+                        rs.getString("profesor_email"),
+                        rs.getString("tipo_contrato"));
 
-                // Buscar profesor por ID (tipo Long)
-                Profesor profesor = profesores.stream()
-                        .filter(p -> Objects.equals(p.getId(), profesorId))
-                        .findFirst()
-                        .orElse(null);
+                // Construir Curso
+                Curso curso = new Curso(
+                        rs.getLong("curso"),
+                        rs.getString("curso_nombre"),
+                        null,
+                        rs.getBoolean("curso_activo"));
 
-                // Buscar curso por ID (tipo Integer)
-                Curso curso = cursos.stream()
-                        .filter(c -> Objects.equals(c.getId(), cursoId))
-                        .findFirst()
-                        .orElse(null);
+                // Construir CursoProfesor
+                CursoProfesor cp = new CursoProfesor(
+                        profesor,
+                        rs.getInt("anio"),
+                        rs.getInt("semestre"),
+                        curso);
 
-                lista.add(new CursoProfesor(profesor, anio, semestre, curso));
+                lista.add(cp);
             }
         }
         return lista;
     }
 
+    // ✅ Métodos adicionales útiles
+    public List<CursoProfesor> obtenerPorProfesor(Long profesorId) throws SQLException {
+        List<CursoProfesor> lista = new ArrayList<>();
+        String sql = "SELECT cp.profesor, cp.curso, cp.anio, cp.semestre, " +
+                "p.nombres AS profesor_nombres, p.apellidos AS profesor_apellidos, " +
+                "p.email AS profesor_email, pr.tipo_contrato, " +
+                "c.nombre AS curso_nombre, c.activo AS curso_activo, c.programa AS curso_programa " +
+                "FROM curso_profesor cp " +
+                "JOIN profesor pr ON cp.profesor = pr.id " +
+                "JOIN persona p ON pr.id = p.id " +
+                "JOIN curso c ON cp.curso = c.id " +
+                "WHERE cp.profesor = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, profesorId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Profesor profesor = new Profesor(
+                            rs.getLong("profesor"),
+                            rs.getString("profesor_nombres"),
+                            rs.getString("profesor_apellidos"),
+                            rs.getString("profesor_email"),
+                            rs.getString("tipo_contrato"));
+
+                    Curso curso = new Curso(
+                            rs.getLong("curso"),
+                            rs.getString("curso_nombre"),
+                            null,
+                            rs.getBoolean("curso_activo"));
+
+                    CursoProfesor cp = new CursoProfesor(
+                            profesor,
+                            rs.getInt("anio"),
+                            rs.getInt("semestre"),
+                            curso);
+
+                    lista.add(cp);
+                }
+            }
+        }
+        return lista;
+    }
+
+    public List<CursoProfesor> obtenerPorCurso(Long cursoId) throws SQLException {
+        List<CursoProfesor> lista = new ArrayList<>();
+        String sql = "SELECT cp.profesor, cp.curso, cp.anio, cp.semestre, " +
+                "p.nombres AS profesor_nombres, p.apellidos AS profesor_apellidos, " +
+                "p.email AS profesor_email, pr.tipo_contrato, " +
+                "c.nombre AS curso_nombre, c.activo AS curso_activo, c.programa AS curso_programa " +
+                "FROM curso_profesor cp " +
+                "JOIN profesor pr ON cp.profesor = pr.id " +
+                "JOIN persona p ON pr.id = p.id " +
+                "JOIN curso c ON cp.curso = c.id " +
+                "WHERE cp.curso = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, cursoId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Profesor profesor = new Profesor(
+                            rs.getLong("profesor"),
+                            rs.getString("profesor_nombres"),
+                            rs.getString("profesor_apellidos"),
+                            rs.getString("profesor_email"),
+                            rs.getString("tipo_contrato"));
+
+                    Curso curso = new Curso(
+                            rs.getLong("curso"),
+                            rs.getString("curso_nombre"),
+                            null,
+                            rs.getBoolean("curso_activo"));
+
+                    CursoProfesor cp = new CursoProfesor(
+                            profesor,
+                            rs.getInt("anio"),
+                            rs.getInt("semestre"),
+                            curso);
+
+                    lista.add(cp);
+                }
+            }
+        }
+        return lista;
+    }
+
+    public boolean existe(CursoProfesor cp) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM curso_profesor " +
+                "WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, cp.getProfesor().getId());
+            stmt.setLong(2, cp.getCurso().getId());
+            stmt.setInt(3, cp.getAnio());
+            stmt.setInt(4, cp.getSemestre());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getInt(1) > 0;
+            }
+        }
+    }
 }

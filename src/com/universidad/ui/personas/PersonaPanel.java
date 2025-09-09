@@ -1,4 +1,4 @@
-package com.universidad.ui;
+package com.universidad.ui.personas;
 
 import com.universidad.modelo.Persona;
 import com.universidad.servicio.InscripcionesPersonas;
@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class PersonaFrame extends JFrame {
+public class PersonaPanel extends JPanel {
     private InscripcionesPersonas inscripcionesPersonas;
     private JTable tabla;
     private DefaultTableModel modeloTabla;
@@ -21,17 +21,14 @@ public class PersonaFrame extends JFrame {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
-    public PersonaFrame() {
+    public PersonaPanel() {
         inscripcionesPersonas = new InscripcionesPersonas();
         setupUI();
         cargarPersonas();
     }
 
     private void setupUI() {
-        setTitle("Gestión de Personas");
-        setSize(800, 500);
-        setLocationRelativeTo(null);
-
+        
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
@@ -53,41 +50,65 @@ public class PersonaFrame extends JFrame {
                 "Información de la Persona",
                 TitledBorder.LEFT,
                 TitledBorder.TOP,
-                new Font("Dialog", Font.BOLD, 12)
-        ));
+                new Font("Dialog", Font.BOLD, 12)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
 
         // ID
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
         panel.add(new JLabel("ID:"), gbc);
+
         gbc.gridx = 1;
-        txtId = new JTextField(15);
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        txtId = new JTextField();
         txtId.setEditable(false);
         txtId.setBackground(new Color(240, 240, 240));
         panel.add(txtId, gbc);
 
         // Nombres
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
         panel.add(new JLabel("Nombres: *"), gbc);
+
         gbc.gridx = 1;
-        txtNombres = new JTextField(15);
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        txtNombres = new JTextField();
         panel.add(txtNombres, gbc);
 
         // Apellidos
-        gbc.gridx = 2; gbc.gridy = 1;
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
         panel.add(new JLabel("Apellidos: *"), gbc);
+
         gbc.gridx = 3;
-        txtApellidos = new JTextField(15);
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        txtApellidos = new JTextField();
         panel.add(txtApellidos, gbc);
 
         // Email
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
         panel.add(new JLabel("Email: *"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3;
-        txtEmail = new JTextField(15);
+
+        gbc.gridx = 1;
+        gbc.gridwidth = 3; // ocupa varias columnas
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        txtEmail = new JTextField();
         panel.add(txtEmail, gbc);
 
         return panel;

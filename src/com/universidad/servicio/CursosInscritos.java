@@ -58,21 +58,13 @@ public class CursosInscritos {
     }
 
     // Actualizar inscripción
-    public void actualizar(Inscripcion inscripcion, Inscripcion nuevaInfo) throws SQLException {
-        inscripcionDAO.actualizar(inscripcion, nuevaInfo);
-        System.out.println("Actualizando inscripción: " + inscripcion);
-        for (int i = 0; i < listado.size(); i++) {
-            Inscripcion ins = listado.get(i);
-            if (Objects.equals(ins.getCurso().getId(), inscripcion.getCurso().getId()) &&
-                    Objects.equals(ins.getEstudiante().getId(), inscripcion.getEstudiante().getId()) &&
-                    ins.getAnio() == inscripcion.getAnio() &&
-                    ins.getSemestre() == inscripcion.getSemestre()) {
-                listado.set(i, nuevaInfo);
-                System.out.println("Inscripción actualizada: " + nuevaInfo);
-                return;
-            }
-        }
-        System.out.println("Inscripción no encontrada para actualizar");
+     public void actualizarInscripcion(Inscripcion inscripcion, int nuevoAnio, int nuevoSemestre) throws SQLException {
+        // Llamamos al DAO para actualizar en BD
+        inscripcionDAO.actualizar(inscripcion, nuevoAnio, nuevoSemestre);
+
+        // Actualizamos el objeto en memoria para reflejar los cambios
+        inscripcion.setAnio(nuevoAnio);
+        inscripcion.setSemestre(nuevoSemestre);
     }
 
     // Guardar información (insertar o actualizar)

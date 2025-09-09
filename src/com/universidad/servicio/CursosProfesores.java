@@ -1,8 +1,6 @@
 package com.universidad.servicio;
 
 import com.universidad.modelo.CursoProfesor;
-import com.universidad.modelo.Curso;
-import com.universidad.modelo.Profesor;
 import com.universidad.persistencia.CursoProfesorDAO;
 
 import java.sql.SQLException;
@@ -26,6 +24,14 @@ public class CursosProfesores implements Servicios {
         }
     }
 
+    public void eliminar(CursoProfesor cursoProfesor) throws SQLException {
+        if (cursoProfesor != null) {
+            cursoProfesorDAO.guardarCursoProfesor(cursoProfesor);
+            listado.add(cursoProfesor);
+            System.out.println("CursoProfesor inscrito: " + cursoProfesor);
+        }
+    }
+
     public void guardarInformacion(CursoProfesor cursoProfesor) throws SQLException {
         if (!listado.contains(cursoProfesor)) {
             inscribir(cursoProfesor);
@@ -34,9 +40,9 @@ public class CursosProfesores implements Servicios {
         }
     }
 
-    public List<CursoProfesor> cargarDatos(List<Profesor> profesores, List<Curso> cursos) throws SQLException {
+    public List<CursoProfesor> cargarDatos() throws SQLException {
         System.out.println("Cargando datos de CursoProfesor...");
-        listado = cursoProfesorDAO.obtenerTodos(profesores, cursos);
+        listado = cursoProfesorDAO.obtenerTodos();
         return listado;
     }
 

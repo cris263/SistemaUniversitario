@@ -1,88 +1,76 @@
 package com.universidad.ui;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
+
+import com.universidad.ui.cursos.CursosInscritosPanel;
+import com.universidad.ui.personas.PersonaPanel;
+import com.universidad.ui.profesores.CursosProfesoresPanel;
+
 import java.awt.*;
 
 public class Menu extends JFrame {
 
-   /* public Menu() {
-        setTitle("Sistema Universitario - Menú Principal");
-        setSize(400, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        JButton btnPersonas = new JButton("Gestionar Personas");
-        btnPersonas.addActionListener(e -> new PersonaFrame().setVisible(true));
-
-        setLayout(new FlowLayout());
-        add(btnPersonas);
-
-    }*/
     public Menu() {
-        setTitle("Menú Principal - Sistema Universitario");
-        setSize(500, 350);
+        setTitle("Sistema Universitario - Menú Principal");
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         // Panel principal con margen
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        // Crear el JTabbedPane
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setFont(new Font("Dialog", Font.BOLD, 12));
 
-        // Caja gris con borde y título
-        JPanel panelMenu = new JPanel(new BorderLayout(10, 10));
-        panelMenu.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
-                "Menú del Sistema",
-                TitledBorder.LEFT,
-                TitledBorder.TOP,
-                new Font("Dialog", Font.BOLD, 12)
-        ));
-        panelMenu.setBackground(new Color(245, 245, 245)); // gris claro
+        // Tab 1: Personas (por defecto)
+        JPanel panelPersonas = crearPanelPersonas();
+        tabbedPane.addTab("👤 Personas", panelPersonas);
 
-        // Mensaje de bienvenida
-        JLabel lblBienvenido = new JLabel("BIENVENIDO AL SISTEMA UNIVERSITARIO", SwingConstants.CENTER);
-        lblBienvenido.setFont(new Font("Dialog", Font.BOLD, 16));
-        lblBienvenido.setForeground(new Color(50, 50, 50));
+        // Tab 2: Cursos
+        JPanel panelCursos = crearPanelCursos();
+        tabbedPane.addTab("📘 Cursos", panelCursos);
 
-        panelMenu.add(lblBienvenido, BorderLayout.NORTH);
+        // Tab 3: Profesores
+        JPanel panelProfesores = crearPanelProfesores();
+        tabbedPane.addTab("🎓 Profesores", panelProfesores);
 
-        // Panel de botones
-        JPanel panelBotones = new JPanel(new GridLayout(3, 1, 15, 15));
-        panelBotones.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-        panelBotones.setOpaque(false);
+        // Establecer el tab por defecto (Personas)
+        tabbedPane.setSelectedIndex(0);
 
-        JButton btnPersonas = new JButton("👤 Gestionar Personas");
-        JButton btnCursos = new JButton("📘 Gestionar Cursos");
-        JButton btnProfesores = new JButton("🎓 Gestionar Profesores");
-
-        Dimension buttonSize = new Dimension(200, 40);
-        for (JButton btn : new JButton[]{btnPersonas, btnCursos, btnProfesores}) {
-            btn.setPreferredSize(buttonSize);
-            panelBotones.add(btn);
-        }
-
-        panelMenu.add(panelBotones, BorderLayout.CENTER);
-
-        // Agregar la caja al panel principal
-        mainPanel.add(panelMenu, BorderLayout.CENTER);
+        // Agregar componentes al panel principal
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
 
         add(mainPanel);
-
-        // Eventos de botones
-        btnPersonas.addActionListener(e -> {
-            new PersonaFrame().setVisible(true);
-            dispose();
-        });
-
-        btnCursos.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Aquí iría la gestión de cursos (en construcción)");
-        });
-
-        btnProfesores.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Aquí iría la gestión de profesores (en construcción)");
-        });
     }
 
+    private JPanel crearPanelPersonas() {
+    JPanel panel = new JPanel(new BorderLayout());
+    panel.setBackground(new Color(245, 245, 245));
+    
+    // Aquí integramos el PersonaPanel en la pestaña
+    PersonaPanel personaPanel = new PersonaPanel();
+    panel.add(personaPanel, BorderLayout.CENTER);
+    
+    return panel;
 }
 
+    private JPanel crearPanelCursos() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(245, 245, 245));
+        
+        CursosInscritosPanel cursosInscritosPanel = new CursosInscritosPanel();
+        panel.add(cursosInscritosPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel crearPanelProfesores() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(245, 245, 245));
+        
+        CursosProfesoresPanel cursosProfesoresPanel = new CursosProfesoresPanel();
+        
+        panel.add(cursosProfesoresPanel, BorderLayout.CENTER);
+        return panel;
+    }
+}
