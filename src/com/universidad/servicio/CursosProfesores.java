@@ -26,11 +26,19 @@ public class CursosProfesores implements Servicios {
 
     public void eliminar(CursoProfesor cursoProfesor) throws SQLException {
         if (cursoProfesor != null) {
-            cursoProfesorDAO.guardarCursoProfesor(cursoProfesor);
-            listado.add(cursoProfesor);
-            System.out.println("CursoProfesor inscrito: " + cursoProfesor);
+            cursoProfesorDAO.eliminarCursoProfesor(cursoProfesor);
+            System.out.println("CursoProfesor eliminado: " + cursoProfesor);
         }
     }
+    public void actualizar(CursoProfesor original, CursoProfesor actualizado) throws SQLException {
+        if (original != null && actualizado != null) {
+            cursoProfesorDAO.actualizarCursoProfesor(original, actualizado);
+            System.out.println("CursoProfesor actualizado: " + actualizado);
+        } else {
+            System.out.println("❌ No se puede actualizar, datos inválidos.");
+        }
+    }
+
 
     public void guardarInformacion(CursoProfesor cursoProfesor) throws SQLException {
         if (!listado.contains(cursoProfesor)) {

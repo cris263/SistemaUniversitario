@@ -33,12 +33,12 @@ public class ProfesorController {
     public void eliminarProfesor(Long id) throws SQLException {
         servicioPersonas.eliminar(id);
     }
-
-    // Listar todos los profesores
+    // Listar todos los profesores (usando ProfesorDAO)
     public List<ProfesorDTO> listarProfesores() throws SQLException {
-        return servicioPersonas.cargarDatos().stream()
-                .filter(p -> p instanceof Profesor)
-                .map(p -> ProfesorMapper.toDTO((Profesor) p))
+        com.universidad.persistencia.ProfesorDAO dao = new com.universidad.persistencia.ProfesorDAO();
+        return dao.obtenerTodos().stream()
+                .map(ProfesorMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
 }

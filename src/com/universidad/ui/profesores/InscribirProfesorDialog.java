@@ -1,20 +1,22 @@
 package com.universidad.ui.profesores;
 
-import com.universidad.modelo.Curso;
-import com.universidad.modelo.Profesor;
-import com.universidad.persistencia.CursoDAO;
-import com.universidad.persistencia.ProfesorDAO;
-import com.universidad.persistencia.DatabaseConnection;
+import com.universidad.controller.CursoController;
+import com.universidad.controller.CursoProfesorController;
+import com.universidad.controller.ProfesorController;
+import com.universidad.dto.CursoDTO;
+import com.universidad.dto.CursoProfesorDTO;
+import com.universidad.dto.ProfesorDTO;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
 public class InscribirProfesorDialog extends JDialog {
+    private CursoProfesorController cursoProfesorController;
+    private ProfesorController profesorController;
+    private CursoController cursoController;
 
     private JTable profesoresTable;
     private JTable cursosTable;
@@ -24,26 +26,25 @@ public class InscribirProfesorDialog extends JDialog {
     private JButton btnAccion;
     private JButton btnCancelar;
 
+    // Variables para modo edición
     private boolean modoEdicion = false;
-    private Long profesorIdOriginal;
-    private Long cursoIdOriginal;
-    private int anioOriginal;
-    private int semestreOriginal;
+    private CursoProfesorDTO dtoOriginal;
 
-    public InscribirProfesorDialog(JFrame parent) {
-        this(parent, false, null, null, 0, 0);
+    // Constructor para CREAR
+    public InscribirProfesorDialog(JFrame parent, CursoProfesorController controller) {
+        this(parent, controller, false, null);
     }
 
-    // --- Constructor para EDITAR ---
-    public InscribirProfesorDialog(JFrame parent, boolean editar, Long profesorId, Long cursoId, int anio,
-            int semestre) {
+    // Constructor para EDITAR
+    public InscribirProfesorDialog(JFrame parent, CursoProfesorController controller,
+                                   boolean editar, CursoProfesorDTO dtoParaEditar) {
         super(parent, editar ? "Actualizar Asignación Profesor" : "Asignar Profesor a Curso", true);
 
+        this.cursoProfesorController = controller;
+        this.profesorController = new ProfesorController();
+        this.cursoController = new CursoController();
         this.modoEdicion = editar;
-        this.profesorIdOriginal = profesorId;
-        this.cursoIdOriginal = cursoId;
-        this.anioOriginal = anio;
-        this.semestreOriginal = semestre;
+        this.dtoOriginal = dtoParaEditar;
 
         setSize(900, 650);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -51,12 +52,10 @@ public class InscribirProfesorDialog extends JDialog {
 
         initComponents();
         setupLayout();
+        cargarDatos();
 
-        // Si es edición, rellenamos los valores originales
-        if (editar) {
-            txtAnio.setText(String.valueOf(anio));
-            txtSemestre.setText(String.valueOf(semestre));
-            lblSeleccion.setText("Editando asignación de profesor " + profesorId + " a curso " + cursoId);
+        if (editar && dtoParaEditar != null) {
+            configurarModoEdicion();
         }
     }
 
@@ -64,8 +63,9 @@ public class InscribirProfesorDialog extends JDialog {
         lblSeleccion = new JLabel(modoEdicion ? "Editando asignación" : "Selecciona un profesor y un curso.");
         txtAnio = new JTextField(6);
         txtSemestre = new JTextField(4);
+        btnAccion = new JButton(modoEdicion ? "Actualizar" : "Asignar");
+        btnCancelar = new JButton("Cancelar");
 
-        btnAccion = new JButton(modoEdicion ? "✏️ Actualizar" : "➕ Asignar");
         btnAccion.addActionListener(e -> {
             if (modoEdicion) {
                 actualizar();
@@ -74,29 +74,37 @@ public class InscribirProfesorDialog extends JDialog {
             }
         });
 
-        btnCancelar = new JButton("❌ Cancelar");
         btnCancelar.addActionListener(e -> dispose());
     }
 
     private void setupLayout() {
         setLayout(new BorderLayout());
 
-        // Panel superior con tabs
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("👨‍🏫 Profesores", crearPanelProfesores());
-        tabbedPane.addTab("📚 Cursos", crearPanelCursos());
+        tabbedPane.addTab("Profesores", crearPanelProfesores());
+        tabbedPane.addTab("Cursos", crearPanelCursos());
 
         add(tabbedPane, BorderLayout.CENTER);
         add(crearPanelAsignacion(), BorderLayout.SOUTH);
     }
 
+    private void configurarModoEdicion() {
+        if (dtoOriginal != null) {
+            txtAnio.setText(String.valueOf(dtoOriginal.getAnio()));
+            txtSemestre.setText(String.valueOf(dtoOriginal.getSemestre()));
+            lblSeleccion.setText("Editando asignación de profesor " + dtoOriginal.getProfesorId() +
+                    " a curso " + dtoOriginal.getCursoId());
+        }
+    }
+
     private JPanel crearPanelProfesores() {
         JPanel panel = new JPanel(new BorderLayout());
+
         DefaultTableModel model = new DefaultTableModel(
                 new String[] { "ID", "Nombres", "Apellidos", "Email", "Tipo Contrato" }, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Solo lectura
+                return false;
             }
         };
 
@@ -105,11 +113,40 @@ public class InscribirProfesorDialog extends JDialog {
         JScrollPane scrollPane = new JScrollPane(profesoresTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        // Cargar profesores
+        return panel;
+    }
+
+    private JPanel crearPanelCursos() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        DefaultTableModel model = new DefaultTableModel(
+                new String[] { "ID", "Nombre", "Activo" }, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        cursosTable = new JTable(model);
+        cursosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(cursosTable);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private void cargarDatos() {
+        cargarProfesores();
+        cargarCursos();
+    }
+
+    private void cargarProfesores() {
         try {
-            ProfesorDAO dao = new ProfesorDAO();
-            List<Profesor> profesores = dao.obtenerTodos(); // Asumiendo que existe este método
-            for (Profesor p : profesores) {
+            List<ProfesorDTO> profesores = profesorController.listarProfesores();
+            DefaultTableModel model = (DefaultTableModel) profesoresTable.getModel();
+            model.setRowCount(0);
+
+            for (ProfesorDTO p : profesores) {
                 model.addRow(new Object[] {
                         p.getId(),
                         p.getNombres(),
@@ -119,74 +156,72 @@ public class InscribirProfesorDialog extends JDialog {
                 });
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error cargando profesores: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            mostrarError("Error cargando profesores: " + ex.getMessage());
         }
-
-        return panel;
     }
 
-    private JPanel crearPanelCursos() {
-        JPanel panel = new JPanel(new BorderLayout());
-        DefaultTableModel model = new DefaultTableModel(
-                new String[] { "ID", "Nombre", "Activo" }, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Solo lectura
-            }
-        };
-
-        cursosTable = new JTable(model);
-        cursosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane scrollPane = new JScrollPane(cursosTable);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        // Cargar cursos
+    private void cargarCursos() {
         try {
-            CursoDAO dao = new CursoDAO();
-            List<Curso> cursos = dao.listarCursos();
-            for (Curso c : cursos) {
-                model.addRow(new Object[] {
+            List<CursoDTO> cursos = cursoController.listarCursosActivos();
+            DefaultTableModel model = (DefaultTableModel) cursosTable.getModel();
+            model.setRowCount(0);
+
+            for (CursoDTO c : cursos) {
+                model.addRow(new Object[]{
                         c.getId(),
                         c.getNombre(),
                         c.getActivo() ? "Sí" : "No"
                 });
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error cargando cursos: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            mostrarError("Error cargando cursos: " + ex.getMessage());
         }
-
-        return panel;
     }
+
+//    private void cargarCursos() {
+//        try {
+//            // Necesitarías crear un CursoController para esto
+//            // Por ahora uso el método directo del DAO
+//            com.universidad.persistencia.CursoDAO cursoDAO = new com.universidad.persistencia.CursoDAO();
+//            List<com.universidad.modelo.Curso> cursos = cursoDAO.listarCursos();
+//
+//            DefaultTableModel model = (DefaultTableModel) cursosTable.getModel();
+//            model.setRowCount(0);
+//
+//            for (com.universidad.modelo.Curso c : cursos) {
+//                model.addRow(new Object[] {
+//                        c.getId(),
+//                        c.getNombre(),
+//                        c.getActivo() ? "Sí" : "No"
+//                });
+//            }
+//        } catch (SQLException ex) {
+//            mostrarError("Error cargando cursos: " + ex.getMessage());
+//        }
+//    }
 
     private JPanel crearPanelAsignacion() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Datos de Asignación"));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
         // Etiqueta de selección
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 4;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridwidth = 4; gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(lblSeleccion, gbc);
 
         // Campos de año y semestre
-        gbc.gridwidth = 1;
-        gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridwidth = 1; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE;
 
         gbc.gridx = 0;
         panel.add(new JLabel("Año:"), gbc);
-
         gbc.gridx = 1;
         panel.add(txtAnio, gbc);
 
         gbc.gridx = 2;
         panel.add(new JLabel("Semestre:"), gbc);
-
         gbc.gridx = 3;
         panel.add(txtSemestre, gbc);
 
@@ -202,24 +237,72 @@ public class InscribirProfesorDialog extends JDialog {
     }
 
     private void asignar() {
-        // Validar selecciones
+        if (!validarFormulario()) return;
+
         int rowProf = profesoresTable.getSelectedRow();
         int rowCur = cursosTable.getSelectedRow();
 
         if (rowProf == -1 || rowCur == -1) {
-            JOptionPane.showMessageDialog(this, "Debe seleccionar un profesor y un curso.",
-                    "Selección requerida", JOptionPane.WARNING_MESSAGE);
+            mostrarError("Debe seleccionar un profesor y un curso.");
             return;
         }
 
-        // Validar campos
+        try {
+            Long profesorId = (Long) profesoresTable.getValueAt(rowProf, 0);
+            Long cursoId = (Long) cursosTable.getValueAt(rowCur, 0);
+            int anio = Integer.parseInt(txtAnio.getText().trim());
+            int semestre = Integer.parseInt(txtSemestre.getText().trim());
+
+            // Crear DTO para la nueva asignación
+            CursoProfesorDTO nuevoDTO = CursoProfesorDTO.builder()
+                    .profesorId(profesorId)
+                    .cursoId(cursoId)
+                    .anio(anio)
+                    .semestre(semestre)
+                    .build();
+
+            // Delegar al controlador
+            cursoProfesorController.asignarProfesor(nuevoDTO);
+
+            lblSeleccion.setText("Asignación creada: Profesor " + profesorId + " a Curso " + cursoId);
+            limpiarFormulario();
+
+        } catch (NumberFormatException ex) {
+            mostrarError("Año y semestre deben ser números válidos.");
+        }
+    }
+
+    private void actualizar() {
+        if (!validarFormulario()) return;
+        if (dtoOriginal == null) return;
+
+        try {
+            int nuevoAnio = Integer.parseInt(txtAnio.getText().trim());
+            int nuevoSemestre = Integer.parseInt(txtSemestre.getText().trim());
+
+            // Delegar al controlador
+            cursoProfesorController.actualizarAsignacion(
+                    dtoOriginal.getProfesorId(),
+                    dtoOriginal.getCursoId(),
+                    dtoOriginal.getAnio(),
+                    dtoOriginal.getSemestre(),
+                    nuevoAnio,
+                    nuevoSemestre
+            );
+
+            dispose();
+        } catch (NumberFormatException ex) {
+            mostrarError("Año y semestre deben ser números válidos.");
+        }
+    }
+
+    private boolean validarFormulario() {
         String anioText = txtAnio.getText().trim();
         String semestreText = txtSemestre.getText().trim();
 
         if (anioText.isEmpty() || semestreText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar año y semestre.",
-                    "Campos requeridos", JOptionPane.WARNING_MESSAGE);
-            return;
+            mostrarError("Debe ingresar año y semestre.");
+            return false;
         }
 
         try {
@@ -227,138 +310,35 @@ public class InscribirProfesorDialog extends JDialog {
             int semestre = Integer.parseInt(semestreText);
 
             if (anio < 2020 || anio > 2030) {
-                JOptionPane.showMessageDialog(this, "El año debe estar entre 2020 y 2030.",
-                        "Año inválido", JOptionPane.WARNING_MESSAGE);
-                return;
+                mostrarError("El año debe estar entre 2020 y 2030.");
+                return false;
             }
 
             if (semestre < 1 || semestre > 2) {
-                JOptionPane.showMessageDialog(this, "El semestre debe ser 1 o 2.",
-                        "Semestre inválido", JOptionPane.WARNING_MESSAGE);
-                return;
+                mostrarError("El semestre debe ser 1 o 2.");
+                return false;
             }
 
-            Long profesorId = (Long) profesoresTable.getValueAt(rowProf, 0);
-            Long cursoId = (Long) cursosTable.getValueAt(rowCur, 0);
-
-            // Verificar si ya existe la asignación
-            if (yaExisteAsignacion(profesorId, cursoId, anio, semestre)) {
-                JOptionPane.showMessageDialog(this,
-                        "Ya existe una asignación de este profesor a este curso en el mismo período.",
-                        "Asignación duplicada", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // Insertar asignación
-            try (Connection conn = DatabaseConnection.getConnection()) {
-                String sql = "INSERT INTO curso_profesor (profesor, curso, anio, semestre) VALUES (?, ?, ?, ?)";
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setLong(1, profesorId);
-                stmt.setLong(2, cursoId);
-                stmt.setInt(3, anio);
-                stmt.setInt(4, semestre);
-                stmt.executeUpdate();
-
-                lblSeleccion.setText("✅ Asignación creada: Profesor " + profesorId + " a Curso " + cursoId);
-                JOptionPane.showMessageDialog(this, "Asignación realizada con éxito.",
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-                // Limpiar campos
-                txtAnio.setText("");
-                txtSemestre.setText("");
-                profesoresTable.clearSelection();
-                cursosTable.clearSelection();
-
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, "Error al asignar: " + ex.getMessage(),
-                        "Error de BD", JOptionPane.ERROR_MESSAGE);
-            }
-
+            return true;
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Año y semestre deben ser números válidos.",
-                    "Formato inválido", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private void actualizar() {
-        String anioText = txtAnio.getText().trim();
-        String semestreText = txtSemestre.getText().trim();
-
-        if (anioText.isEmpty() || semestreText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar año y semestre.",
-                    "Campos requeridos", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        try {
-            int anio = Integer.parseInt(anioText);
-            int semestre = Integer.parseInt(semestreText);
-
-            try (Connection conn = DatabaseConnection.getConnection()) {
-                String sql = "UPDATE curso_profesor SET anio = ?, semestre = ? " +
-                        "WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setInt(1, anio);
-                stmt.setInt(2, semestre);
-                stmt.setLong(3, profesorIdOriginal);
-                stmt.setLong(4, cursoIdOriginal);
-                stmt.setInt(5, anioOriginal);
-                stmt.setInt(6, semestreOriginal);
-
-                int rows = stmt.executeUpdate();
-
-                if (rows > 0) {
-                    JOptionPane.showMessageDialog(this, "Asignación actualizada correctamente.",
-                            "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(this, "No se encontró la asignación a actualizar.",
-                            "No encontrado", JOptionPane.WARNING_MESSAGE);
-                }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, "Error al actualizar: " + ex.getMessage(),
-                        "Error de BD", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Año y semestre deben ser números válidos.",
-                    "Formato inválido", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private boolean yaExisteAsignacion(Long profesorId, Long cursoId, int anio, int semestre) {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            String sql = "SELECT COUNT(*) FROM curso_profesor " +
-                    "WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setLong(1, profesorId);
-            stmt.setLong(2, cursoId);
-            stmt.setInt(3, anio);
-            stmt.setInt(4, semestre);
-
-            var rs = stmt.executeQuery();
-            rs.next();
-            return rs.getInt(1) > 0;
-
-        } catch (SQLException ex) {
+            mostrarError("Año y semestre deben ser números válidos.");
             return false;
         }
     }
 
-    // Método para testing
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Test");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(200, 100);
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
+    private void limpiarFormulario() {
+        txtAnio.setText("");
+        txtSemestre.setText("");
+        profesoresTable.clearSelection();
+        cursosTable.clearSelection();
+        lblSeleccion.setText("Selecciona un profesor y un curso.");
+    }
 
-            // Modo CREAR
-            new InscribirProfesorDialog(frame).setVisible(true);
+    private void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
-            // Para probar modo ACTUALIZAR:
-            // new InscribirProfesorDialog(frame, true, 1L, 2L, 2024, 1).setVisible(true);
-        });
+    private void mostrarExito(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
 }

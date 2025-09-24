@@ -211,7 +211,6 @@ public class PersonaPanel extends JPanel {
 
         controller.actualizarPersona(dto);
     }
-
     private void eliminarPersona() {
         int fila = tabla.getSelectedRow();
         if (fila < 0) {
@@ -222,6 +221,7 @@ public class PersonaPanel extends JPanel {
         Long id = Long.parseLong(tabla.getValueAt(fila, 0).toString());
         controller.eliminarPersona(id);
     }
+
 
     private void cargarDatosSeleccionados() {
         int fila = tabla.getSelectedRow();

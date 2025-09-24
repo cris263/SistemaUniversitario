@@ -1,25 +1,22 @@
 package com.universidad.ui.profesores;
 
-import com.universidad.modelo.CursoProfesor;
-import com.universidad.persistencia.CursoProfesorDAO;
-import com.universidad.servicio.CursosProfesores;
-
+import com.universidad.controller.CursoProfesorController;
+import com.universidad.dto.CursoProfesorDTO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.SQLException;
 import java.util.List;
 
 public class CursosProfesoresPanel extends JPanel {
-    private CursosProfesores cursosProfesores;
+    private CursoProfesorController controller;
     private JTable tabla;
     private DefaultTableModel modeloTabla;
 
     public CursosProfesoresPanel() {
-        this.cursosProfesores = new CursosProfesores();
+        this.controller = new CursoProfesorController(this);
         setupUI();
-        cargarCursosProfesores();
+        controller.cargarAsignaciones();
     }
 
     private void setupUI() {
@@ -38,12 +35,11 @@ public class CursosProfesoresPanel extends JPanel {
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(),
                 "Cursos - Profesores",
-                TitledBorder.LEFT,
-                TitledBorder.TOP,
+                TitledBorder.LEFT, TitledBorder.TOP,
                 new Font("Dialog", Font.BOLD, 12)));
 
         modeloTabla = new DefaultTableModel(
-                new String[] { "Curso ID", "Curso Nombre", "Profesor ID", "Profesor Nombre" },
+                new String[] { "Curso ID", "Curso Nombre", "Profesor ID", "Profesor Nombre", "Año", "Semestre" },
                 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -54,6 +50,7 @@ public class CursosProfesoresPanel extends JPanel {
         tabla = new JTable(modeloTabla);
         tabla.setRowHeight(25);
         tabla.getTableHeader().setReorderingAllowed(false);
+        tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JScrollPane scrollPane = new JScrollPane(tabla);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -69,69 +66,10 @@ public class CursosProfesoresPanel extends JPanel {
         JButton btnAsignar = new JButton("➕ Asignar");
         JButton btnActualizar = new JButton("✏️ Actualizar");
 
-        btnRefrescar.addActionListener(e -> cargarCursosProfesores());
-        btnEliminar.addActionListener(e -> eliminarRelacion());
-
-        // ✅ BOTÓN ASIGNAR - Abrir dialog para nueva asignación
-        btnAsignar.addActionListener(e -> {
-            try {
-                // Obtener el JFrame padre (this debe ser un componente dentro de un JFrame)
-                JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-
-                // Crear y mostrar el dialog
-                InscribirProfesorDialog dialog = new InscribirProfesorDialog(parentFrame);
-                dialog.setVisible(true);
-
-                // Refrescar la tabla después de cerrar el dialog
-                cargarCursosProfesores();
-
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Error al abrir el formulario de asignación: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        // ✅ BOTÓN ACTUALIZAR - Abrir dialog para editar asignación existente
-        btnActualizar.addActionListener(e -> {
-            int fila = tabla.getSelectedRow();
-            if (fila < 0) {
-                mostrarAdvertencia("Seleccione una relación para actualizar");
-                return;
-            }
-
-            try {
-                // Obtener valores de la fila seleccionada
-                // Ajusta estos índices según las columnas de tu tabla
-                Long cursoId = Long.valueOf(tabla.getValueAt(fila, 0).toString()); // Columna Curso ID
-                Long profesorId = Long.valueOf(tabla.getValueAt(fila, 2).toString()); // Columna Profesor ID
-                int anio = Integer.valueOf(tabla.getValueAt(fila, 4).toString()); // Columna Año
-                int semestre = Integer.valueOf(tabla.getValueAt(fila, 5).toString()); // Columna Semestre
-
-                // Obtener el JFrame padre
-                JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-
-                // Crear dialog en modo edición
-                InscribirProfesorDialog dialog = new InscribirProfesorDialog(
-                        parentFrame,
-                        true, // modoEdicion = true
-                        profesorId, // profesorIdOriginal
-                        cursoId, // cursoIdOriginal
-                        anio, // anioOriginal
-                        semestre // semestreOriginal
-                );
-
-                dialog.setVisible(true);
-
-                // Refrescar la tabla después de cerrar el dialog
-                cargarCursosProfesores();
-
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Error al abrir el formulario de actualización: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+        btnRefrescar.addActionListener(e -> controller.cargarAsignaciones());
+        btnEliminar.addActionListener(e -> eliminarAsignacion());
+        btnAsignar.addActionListener(e -> abrirFormularioAsignar());
+        btnActualizar.addActionListener(e -> abrirFormularioActualizar());
 
         panel.add(btnRefrescar);
         panel.add(btnEliminar);
@@ -141,51 +79,108 @@ public class CursosProfesoresPanel extends JPanel {
         return panel;
     }
 
-    private void cargarCursosProfesores() {
-        try {
-            modeloTabla.setRowCount(0);
-            List<CursoProfesor> lista = cursosProfesores.cargarDatos();
-            for (CursoProfesor cp : lista) {
-                modeloTabla.addRow(new Object[] {
-                        cp.getCurso().getId(),
-                        cp.getCurso().getNombre(),
-                        cp.getProfesor().getId(),
-                        cp.getProfesor().getNombres() + " " + cp.getProfesor().getApellidos()
-                });
-            }
-        } catch (SQLException ex) {
-            mostrarError("Error al cargar cursos-profesores: " + ex.getMessage());
+    // MetODO CLAVE: Llamado por el controlador para actualizar la tabla
+    public void actualizarTabla(List<CursoProfesorDTO> asignaciones) {
+        modeloTabla.setRowCount(0);
+
+        for (CursoProfesorDTO cp : asignaciones) {
+            modeloTabla.addRow(new Object[] {
+                    cp.getCursoId(),
+                    cp.getCursoNombre(),
+                    cp.getProfesorId(),
+                    cp.getProfesorNombre(),
+                    cp.getAnio(),
+                    cp.getSemestre()
+            });
         }
     }
 
-    private void eliminarRelacion() {
+    private void eliminarAsignacion() {
         int fila = tabla.getSelectedRow();
         if (fila < 0) {
-            mostrarAdvertencia("Seleccione una relación para eliminar");
+            mostrarAdvertencia("Seleccione una asignación para eliminar");
             return;
         }
 
         try {
             Long cursoId = Long.valueOf(tabla.getValueAt(fila, 0).toString());
             Long profesorId = Long.valueOf(tabla.getValueAt(fila, 2).toString());
+            int anio = Integer.valueOf(tabla.getValueAt(fila, 4).toString());
+            int semestre = Integer.valueOf(tabla.getValueAt(fila, 5).toString());
 
-            // cursosProfesores.eliminar(cursoId, profesorId);
-            mostrarExito("Relación eliminada correctamente");
-            cargarCursosProfesores();
+            // Delegar al controlador
+            controller.eliminarAsignacion(profesorId, cursoId, anio, semestre);
         } catch (Exception ex) {
-            mostrarError("Error al eliminar: " + ex.getMessage());
+            mostrarError("Error al procesar eliminación: " + ex.getMessage());
         }
     }
 
-    private void mostrarError(String mensaje) {
+    private void abrirFormularioAsignar() {
+        try {
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            InscribirProfesorDialog dialog = new InscribirProfesorDialog(parentFrame, controller);
+            dialog.setVisible(true);
+
+            // Refrescar después de cerrar
+            dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    controller.cargarAsignaciones();
+                }
+            });
+        } catch (Exception ex) {
+            mostrarError("Error al abrir formulario: " + ex.getMessage());
+        }
+    }
+
+    private void abrirFormularioActualizar() {
+        int fila = tabla.getSelectedRow();
+        if (fila < 0) {
+            mostrarAdvertencia("Seleccione una asignación para actualizar");
+            return;
+        }
+
+        try {
+            Long cursoId = Long.valueOf(tabla.getValueAt(fila, 0).toString());
+            Long profesorId = Long.valueOf(tabla.getValueAt(fila, 2).toString());
+            int anio = Integer.valueOf(tabla.getValueAt(fila, 4).toString());
+            int semestre = Integer.valueOf(tabla.getValueAt(fila, 5).toString());
+
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+            // Crear DTO para la edición
+            CursoProfesorDTO dtoParaEditar = CursoProfesorDTO.builder()
+                    .cursoId(cursoId)
+                    .profesorId(profesorId)
+                    .anio(anio)
+                    .semestre(semestre)
+                    .build();
+
+            InscribirProfesorDialog dialog = new InscribirProfesorDialog(
+                    parentFrame, controller, true, dtoParaEditar);
+            dialog.setVisible(true);
+
+            dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    controller.cargarAsignaciones();
+                }
+            });
+        } catch (Exception ex) {
+            mostrarError("Error al abrir actualización: " + ex.getMessage());
+        }
+    }
+
+    // Métodos para mostrar mensajes - llamados por el controlador
+    public void mostrarError(String mensaje) {
         JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    private void mostrarExito(String mensaje) {
+    public void mostrarExito(String mensaje) {
         JOptionPane.showMessageDialog(this, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void mostrarAdvertencia(String mensaje) {
+    public void mostrarAdvertencia(String mensaje) {
         JOptionPane.showMessageDialog(this, mensaje, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 }

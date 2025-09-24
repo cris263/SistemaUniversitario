@@ -11,6 +11,7 @@ public class CursoMapper {
         return CursoDTO.builder()
                 .id(curso.getId())
                 .nombre(curso.getNombre())
+                .programa(curso.getPrograma())
                 .activo(curso.getActivo())
                 .build();
     }
@@ -18,11 +19,11 @@ public class CursoMapper {
     public static Curso toEntity(CursoDTO dto) {
         if (dto == null) return null;
 
-        Curso curso = new Curso();
-        curso.setId(dto.getId());
-        curso.setNombre(dto.getNombre());
-        curso.setActivo(dto.getActivo());
-
-        return curso;
+        return new Curso(
+                dto.getId(),
+                dto.getNombre(),
+                dto.getPrograma(),
+                dto.getActivo()
+        );
     }
 }
