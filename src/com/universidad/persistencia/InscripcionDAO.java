@@ -13,8 +13,14 @@ public class InscripcionDAO {
 
     // 1️⃣ Guardar la inscripción (INSERT)
     public void inscribirCurso(Inscripcion inscripcion) throws SQLException {
+        // Detectar qué base de datos usar
+        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
+        if (dbManager == null) {
+            throw new SQLException("No hay ninguna base de datos disponible");
+        }
+        
         String sql = "INSERT INTO inscripcion (curso, estudiante, anio, semestre) VALUES (?, ?, ?, ?)";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = dbManager.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, inscripcion.getCurso().getId());
             ps.setLong(2, inscripcion.getEstudiante().getId());
@@ -26,8 +32,14 @@ public class InscripcionDAO {
 
     // 2️⃣ Eliminar inscripción
     public void eliminar(Inscripcion inscripcion) throws SQLException {
+        // Detectar qué base de datos usar
+        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
+        if (dbManager == null) {
+            throw new SQLException("No hay ninguna base de datos disponible");
+        }
+        
         String sql = "DELETE FROM inscripcion WHERE curso = ? AND estudiante = ? AND anio = ? AND semestre = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = dbManager.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, inscripcion.getCurso().getId());
             ps.setLong(2, inscripcion.getEstudiante().getId());
@@ -39,27 +51,40 @@ public class InscripcionDAO {
 
     // 3️⃣ Actualizar inscripción
     public void actualizar(Inscripcion inscripcion, int nuevoAnio, int nuevoSemestre) throws SQLException {
-    String sql = "UPDATE inscripcion SET anio = ?, semestre = ? " +
-                 "WHERE curso = ? AND estudiante = ? AND anio = ? AND semestre = ?";
-    try (Connection connection = DatabaseConnection.getConnection();
-         PreparedStatement ps = connection.prepareStatement(sql)) {
-        // Nuevos valores
-        ps.setInt(1, nuevoAnio);
-        ps.setInt(2, nuevoSemestre);
+        // Detectar qué base de datos usar
+        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
+        if (dbManager == null) {
+            throw new SQLException("No hay ninguna base de datos disponible");
+        }
+        
+        String sql = "UPDATE inscripcion SET anio = ?, semestre = ? " +
+                     "WHERE curso = ? AND estudiante = ? AND anio = ? AND semestre = ?";
+        try (Connection connection = dbManager.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            // Nuevos valores
+            ps.setInt(1, nuevoAnio);
+            ps.setInt(2, nuevoSemestre);
 
-        // Condiciones (clave primaria actual)
-        ps.setLong(3, inscripcion.getCurso().getId());
-        ps.setLong(4, inscripcion.getEstudiante().getId());
-        ps.setInt(5, inscripcion.getAnio());
-        ps.setInt(6, inscripcion.getSemestre());
+            // Condiciones (clave primaria actual)
+            ps.setLong(3, inscripcion.getCurso().getId());
+            ps.setLong(4, inscripcion.getEstudiante().getId());
+            ps.setInt(5, inscripcion.getAnio());
+            ps.setInt(6, inscripcion.getSemestre());
 
-        ps.executeUpdate();
+            ps.executeUpdate();
+        }
     }
-}
 
     // 4️⃣ Cargar todas las inscripciones
     public List<Inscripcion> cargarDatos() throws SQLException {
         List<Inscripcion> inscripciones = new ArrayList<>();
+        
+        // Detectar qué base de datos usar
+        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
+        if (dbManager == null) {
+            throw new SQLException("No hay ninguna base de datos disponible");
+        }
+        
         String sql = """
             SELECT i.curso, i.estudiante, i.anio, i.semestre,
                    c.nombre AS curso_nombre,
@@ -70,7 +95,7 @@ public class InscripcionDAO {
             JOIN persona p ON e.id = p.id
         """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = dbManager.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

@@ -3,8 +3,9 @@ package com.universidad.ui.cursos;
 import com.universidad.controller.EstudianteController;
 import com.universidad.controller.CursoController;
 import com.universidad.dto.EstudianteDTO;
+import com.universidad.factory.ControllerFactory;
 import com.universidad.dto.CursoDTO;
-import com.universidad.persistencia.DatabaseConnection;
+import com.universidad.persistencia.DatabaseFactory;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -45,8 +46,8 @@ public class InscribirFrame extends JFrame {
         this.semestreOriginal = semestre;
 
         // Inicializar controladores
-        this.estudianteController = new EstudianteController();
-        this.cursoController = new CursoController();
+        this.estudianteController = ControllerFactory.crearEstudianteController();
+        this.cursoController = ControllerFactory.crearCursoController();
 
         setTitle(editar ? "Actualizar Inscripción" : "Gestión de Universidad - Inscripciones");
         setSize(900, 650);
@@ -235,7 +236,7 @@ public class InscribirFrame extends JFrame {
             int semestre = Integer.parseInt(txtSemestre.getText().trim());
 
             // Mantener SQL directo como en tu código original
-            try (Connection conn = DatabaseConnection.getConnection()) {
+            try (Connection conn = DatabaseFactory.getActiveDatabaseManager().getConnection()) {
                 String sql = "INSERT INTO inscripcion (curso, estudiante, anio, semestre) VALUES (?, ?, ?, ?)";
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setLong(1, cursoId);
@@ -264,7 +265,7 @@ public class InscribirFrame extends JFrame {
             int nuevoSemestre = Integer.parseInt(txtSemestre.getText().trim());
 
             // Mantener SQL directo como en tu código original
-            try (Connection conn = DatabaseConnection.getConnection()) {
+            try (Connection conn = DatabaseFactory.getActiveDatabaseManager().getConnection()) {
                 String sql = "UPDATE inscripcion SET anio = ?, semestre = ? " +
                         "WHERE curso = ? AND estudiante = ? AND anio = ? AND semestre = ?";
                 PreparedStatement stmt = conn.prepareStatement(sql);

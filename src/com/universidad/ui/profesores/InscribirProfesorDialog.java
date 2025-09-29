@@ -6,6 +6,7 @@ import com.universidad.controller.ProfesorController;
 import com.universidad.dto.CursoDTO;
 import com.universidad.dto.CursoProfesorDTO;
 import com.universidad.dto.ProfesorDTO;
+import com.universidad.factory.ControllerFactory;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -41,8 +42,8 @@ public class InscribirProfesorDialog extends JDialog {
         super(parent, editar ? "Actualizar Asignación Profesor" : "Asignar Profesor a Curso", true);
 
         this.cursoProfesorController = controller;
-        this.profesorController = new ProfesorController();
-        this.cursoController = new CursoController();
+        this.profesorController = ControllerFactory.crearProfesorController();
+        this.cursoController = ControllerFactory.crearCursoController();
         this.modoEdicion = editar;
         this.dtoOriginal = dtoParaEditar;
 

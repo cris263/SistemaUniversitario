@@ -1,6 +1,7 @@
 package com.universidad.controller;
 
 import com.universidad.dto.CursoProfesorDTO;
+import com.universidad.factory.InternalFactory;
 import com.universidad.mapper.CursoProfesorMapper;
 import com.universidad.modelo.CursoProfesor;
 import com.universidad.modelo.Profesor;
@@ -18,7 +19,7 @@ public class CursoProfesorController {
 
     public CursoProfesorController(CursosProfesoresPanel view) {
         this.view = view;
-        this.servicioCursoProfesor = new CursosProfesores();
+        this.servicioCursoProfesor = InternalFactory.Services.crearCursosProfesores();
     }
 
     public void asignarProfesor(CursoProfesorDTO cursoProfesorDTO) {

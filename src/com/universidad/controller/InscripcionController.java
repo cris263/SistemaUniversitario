@@ -2,6 +2,7 @@
 package com.universidad.controller;
 
 import com.universidad.dto.InscripcionDTO;
+import com.universidad.factory.InternalFactory;
 import com.universidad.mapper.InscripcionMapper;
 import com.universidad.modelo.Inscripcion;
 import com.universidad.servicio.CursosInscritos;
@@ -17,7 +18,7 @@ public class InscripcionController {
 
     public InscripcionController(CursosInscritosPanel view) {
         this.view = view;
-        this.servicioInscripciones = new CursosInscritos(new com.universidad.persistencia.InscripcionDAO());
+        this.servicioInscripciones = InternalFactory.Services.crearCursosInscritos();
     }
 
     public void inscribirEstudiante(InscripcionDTO inscripcionDTO) {

@@ -2,16 +2,28 @@ package com.universidad.persistencia;
 
 import java.sql.*;
 
-public class DatabaseConnection {
-    private static final String DB_URL = "jdbc:h2:mem:universidad;DB_CLOSE_DELAY=-1";
-    private static final String USERNAME = "sa";
-    private static final String PASSWORD = "";
+/**
+ * Gestor simple para H2 Database
+ * Implementa la interfaz DatabaseManager de forma sencilla
+ */
+public class H2DatabaseManager implements DatabaseManager {
     
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+    private String url = "jdbc:h2:mem:universidad;DB_CLOSE_DELAY=-1";
+    private String user = "sa";
+    private String pass = "";
+    
+    @Override
+    public Connection getConnection() throws SQLException {
+        try {
+            Class.forName("org.h2.Driver");
+            return DriverManager.getConnection(url, user, pass);
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("Driver H2 no encontrado");
+        }
     }
     
-    public static void initializeDatabase() {
+    @Override
+    public boolean createTables() {
         try (Connection conn = getConnection()) {
             String createPersonaTable = """
                     CREATE TABLE IF NOT EXISTS persona (
@@ -114,25 +126,25 @@ public class DatabaseConnection {
                 stmt.execute(createInscripcionTable);
             }
 
-            System.out.println("Base de datos inicializada correctamente (todas las tablas creadas)");
-
-            // Insertar datos de prueba
-            insertTestData();
-
+            System.out.println("✅ Tablas H2 creadas correctamente (todas las tablas creadas)");
+            return true;
+            
         } catch (SQLException e) {
-            System.err.println("Error inicializando la base de datos: " + e.getMessage());
+            System.err.println("❌ Error creando tablas H2: " + e.getMessage());
+            return false;
         }
     }
     
-    public static void insertTestData() {
+    @Override
+    public boolean insertTestData() {
         try (Connection conn = getConnection()) {
             // Verificar si ya hay datos
             PreparedStatement checkData = conn.prepareStatement("SELECT COUNT(*) FROM persona");
             ResultSet rs = checkData.executeQuery();
             rs.next();
             if (rs.getInt(1) > 0) {
-                System.out.println("Los datos de prueba ya existen.");
-                return;
+                System.out.println("ℹ️ Los datos de prueba ya existen.");
+                return true;
             }
             
             conn.setAutoCommit(false);
@@ -296,10 +308,33 @@ public class DatabaseConnection {
             System.out.println("   - 10 estudiantes activos con promedios");
             System.out.println("   - 6 asignaciones profesor-curso");
             System.out.println("   - 10 inscripciones de estudiantes");
+            return true;
             
         } catch (SQLException e) {
-            System.err.println("Error insertando datos de prueba: " + e.getMessage());
+            System.err.println("❌ Error insertando datos de prueba: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
+    }
+    
+    @Override
+    public boolean initialize() {
+        System.out.println("🔄 Inicializando H2 Database...");
+        
+        if (!createTables()) {
+            return false;
+        }
+        
+        if (!insertTestData()) {
+            return false;
+        }
+        
+        System.out.println("✅ H2 Database inicializada correctamente");
+        return true;
+    }
+    
+    @Override
+    public String getName() {
+        return "H2 Database (Memoria)";
     }
 }

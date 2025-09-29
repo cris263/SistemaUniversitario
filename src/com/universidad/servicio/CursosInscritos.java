@@ -8,14 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CursosInscritos {
+public class CursosInscritos implements Servicios {
 
     private List<Inscripcion> listado;
-    private InscripcionDAO inscripcionDAO;
+    private InscripcionDAO inscripcionDAO = new InscripcionDAO();
 
-    public CursosInscritos(InscripcionDAO inscripcionDAO) {
+    public CursosInscritos() {
         this.listado = new ArrayList<>();
-        this.inscripcionDAO = inscripcionDAO;
     }
 
     // Inscribir un curso
@@ -102,4 +101,21 @@ public class CursosInscritos {
             System.out.println(ins);
         }
     }
+
+    @Override
+    public String imprimirPosicion(String posicion){
+        return "posicion";
+    };
+    
+    
+    @Override
+    public Integer cantidadActual(){
+        return 0;
+    };
+    
+    @Override
+    public List<String> imprimirListado() {
+        List<String> list = new ArrayList<>();
+        return list;
+    };
 }

@@ -1,6 +1,7 @@
 package com.universidad.controller;
 
 import com.universidad.dto.PersonaDTO;
+import com.universidad.factory.InternalFactory;
 import com.universidad.mapper.PersonaMapper;
 import com.universidad.modelo.Persona;
 import com.universidad.servicio.InscripcionesPersonas;
@@ -16,7 +17,7 @@ public class PersonaController {
 
     public PersonaController(PersonaPanel view) {
         this.view = view;
-        this.servicioPersonas = new InscripcionesPersonas();
+        this.servicioPersonas = InternalFactory.Services.crearInscripcionesPersonas();
     }
 
     // Guardar nueva persona

@@ -3,6 +3,7 @@ package com.universidad.ui;
 import javax.swing.*;
 
 import com.universidad.ui.cursos.CursosInscritosPanel;
+import com.universidad.ui.database.DatabasePanel;
 import com.universidad.ui.personas.PersonaPanel;
 import com.universidad.ui.profesores.CursosProfesoresPanel;
 
@@ -34,6 +35,10 @@ public class Menu extends JFrame {
         // Tab 3: Profesores
         JPanel panelProfesores = crearPanelProfesores();
         tabbedPane.addTab("🎓 Profesores", panelProfesores);
+
+        // Tab 4: Base de Datos
+        JPanel panelBaseDatos = crearPanelBaseDatos();
+        tabbedPane.addTab("🗄️ Base de Datos", panelBaseDatos);
 
         // Establecer el tab por defecto (Personas)
         tabbedPane.setSelectedIndex(0);
@@ -71,6 +76,16 @@ public class Menu extends JFrame {
         CursosProfesoresPanel cursosProfesoresPanel = new CursosProfesoresPanel();
         
         panel.add(cursosProfesoresPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel crearPanelBaseDatos() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(245, 245, 245));
+        
+        DatabasePanel databasePanel = new DatabasePanel();
+        panel.add(databasePanel, BorderLayout.CENTER);
+        
         return panel;
     }
 }

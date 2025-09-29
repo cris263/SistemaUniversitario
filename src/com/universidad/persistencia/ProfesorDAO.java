@@ -1,7 +1,6 @@
 package com.universidad.persistencia;
 
 import com.universidad.modelo.Profesor;
-import com.universidad.modelo.Persona;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,6 +10,12 @@ public class ProfesorDAO {
 
     public List<Profesor> obtenerTodos() throws SQLException {
         List<Profesor> profesores = new ArrayList<>();
+        
+        // Detectar qué base de datos usar
+        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
+        if (dbManager == null) {
+            throw new SQLException("No hay ninguna base de datos disponible");
+        }
 
         String sql = """
                     SELECT p.id, p.nombres, p.apellidos, p.email, pr.tipo_contrato
@@ -18,7 +23,7 @@ public class ProfesorDAO {
                     JOIN persona p ON pr.id = p.id
                 """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = dbManager.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 ResultSet rs = stmt.executeQuery()) {
 
@@ -38,6 +43,12 @@ public class ProfesorDAO {
     }
 
     public Profesor buscarPorId(Long id) throws SQLException {
+        // Detectar qué base de datos usar
+        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
+        if (dbManager == null) {
+            throw new SQLException("No hay ninguna base de datos disponible");
+        }
+        
         String sql = """
                     SELECT p.id, p.nombres, p.apellidos, p.email, pr.tipo_contrato
                     FROM profesor pr
@@ -45,7 +56,7 @@ public class ProfesorDAO {
                     WHERE p.id = ?
                 """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = dbManager.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
 
