@@ -6,7 +6,7 @@ import com.universidad.controller.*;
  * Fábrica para crear y gestionar controladores
  * Implementa el patrón Factory siguiendo la misma estructura que ServiceFactory
  */
-public class ControllerFactory implements InterfazFactory<ControllerFactory.TipoController, Object> {
+public class ControllerFactory implements GenericFactory<ControllerFactory.TipoController, Object> {
     
     // Enum para tipos de controlador
     public enum TipoController {

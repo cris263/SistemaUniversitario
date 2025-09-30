@@ -179,28 +179,6 @@ public class InscribirProfesorDialog extends JDialog {
         }
     }
 
-//    private void cargarCursos() {
-//        try {
-//            // Necesitarías crear un CursoController para esto
-//            // Por ahora uso el método directo del DAO
-//            com.universidad.persistencia.CursoDAO cursoDAO = new com.universidad.persistencia.CursoDAO();
-//            List<com.universidad.modelo.Curso> cursos = cursoDAO.listarCursos();
-//
-//            DefaultTableModel model = (DefaultTableModel) cursosTable.getModel();
-//            model.setRowCount(0);
-//
-//            for (com.universidad.modelo.Curso c : cursos) {
-//                model.addRow(new Object[] {
-//                        c.getId(),
-//                        c.getNombre(),
-//                        c.getActivo() ? "Sí" : "No"
-//                });
-//            }
-//        } catch (SQLException ex) {
-//            mostrarError("Error cargando cursos: " + ex.getMessage());
-//        }
-//    }
-
     private JPanel crearPanelAsignacion() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Datos de Asignación"));

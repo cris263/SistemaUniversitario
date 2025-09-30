@@ -3,8 +3,8 @@ package com.universidad.controller;
 import com.universidad.servicio.DatabaseService;
 
 /**
- * Controlador simple para gestionar operaciones de base de datos
- * Solo dos métodos: cambiar BD y saber en cuál estamos
+ * Controlador para gestionar operaciones de base de datos
+ * Incluye consulta de fecha a través de la cadena de servicios
  */
 public class DatabaseController {
     
@@ -33,5 +33,14 @@ public class DatabaseController {
      */
     public String obtenerBaseDatosActual() {
         return databaseService.obtenerBaseDatosActual();
+    }
+    
+    /**
+     * Obtener la fecha actual según la base de datos activa
+     * Este método consulta al DatabaseService, que a su vez consulta al DateDAO
+     * @return String con la fecha formateada como YYYY-MM-DD
+     */
+    public String obtenerFechaActual() {
+        return databaseService.obtenerFechaActual();
     }
 }

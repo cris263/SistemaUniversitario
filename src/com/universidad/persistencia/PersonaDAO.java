@@ -10,26 +10,51 @@ public class PersonaDAO {
 
 
     public void guardarPersona(Persona persona) throws SQLException {
-        // Detectar qué base de datos usar
         DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
         if (dbManager == null) {
             throw new SQLException("No hay ninguna base de datos disponible");
         }
         
+        DatabaseFactory.DatabaseType dbType = DatabaseFactory.detectActiveDatabase();
         String sql = getSqlForInsertPersona();
-        try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            setInsertParameters(stmt, persona);
-            stmt.executeUpdate();
-
-            // Obtener el ID generado
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    persona.setId(rs.getLong(1)); // asigna el id a persona
+        
+        try (Connection conn = dbManager.getConnection()) {
+            // Para Oracle, usamos un enfoque diferente
+            if (dbType == DatabaseFactory.DatabaseType.ORACLE) {
+                // 1. Para Oracle: primero obtener el ID de la secuencia
+                try (PreparedStatement seqStmt = conn.prepareStatement("SELECT persona_seq.NEXTVAL FROM dual")) {
+                    ResultSet seqRs = seqStmt.executeQuery();
+                    if (seqRs.next()) {
+                        long newId = seqRs.getLong(1);
+                        persona.setId(newId); // Guardar ID
+                        
+                        // 2. Usar el ID obtenido en el INSERT
+                        try (PreparedStatement insertStmt = conn.prepareStatement(
+                                "INSERT INTO persona (id, nombres, apellidos, email) VALUES (?, ?, ?, ?)")) {
+                            insertStmt.setLong(1, newId);
+                            insertStmt.setString(2, persona.getNombres());
+                            insertStmt.setString(3, persona.getApellidos());
+                            insertStmt.setString(4, persona.getEmail());
+                            insertStmt.executeUpdate();
+                        }
+                    }
+                }
+            } 
+            // Para MySQL y H2, seguimos con el enfoque actual
+            else {
+                try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                    setInsertParameters(stmt, persona);
+                    stmt.executeUpdate();
+                    
+                    // Obtener ID generado (solo funciona en MySQL/H2)
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            persona.setId(rs.getLong(1));
+                        }
+                    }
                 }
             }
-
+            
             System.out.println("Persona guardada correctamente con ID: " + persona.getId());
         }
     }

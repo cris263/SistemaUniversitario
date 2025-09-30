@@ -1,5 +1,6 @@
 package com.universidad.servicio;
 
+import com.universidad.factory.DAOFactory;
 import com.universidad.modelo.Persona;
 import com.universidad.persistencia.PersonaDAO;
 
@@ -13,7 +14,7 @@ public class InscripcionesPersonas {
     
     public InscripcionesPersonas() {
         this.listado = new ArrayList<>();
-        this.personaDAO = new PersonaDAO();
+        this.personaDAO = DAOFactory.crearPersonaDAO();
     }
     
     public void inscribir(Persona persona) throws SQLException {

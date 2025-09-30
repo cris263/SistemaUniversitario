@@ -11,6 +11,7 @@ public class DatabasePanel extends JPanel {
     
     private DatabaseController databaseController;
     private JLabel labelBaseDatosActual;
+    private JLabel labelFecha;
     private JButton btnH2, btnMySQL, btnOracle;
     
     public DatabasePanel() {
@@ -56,9 +57,30 @@ public class DatabasePanel extends JPanel {
         labelBaseDatosActual.setFont(new Font("Dialog", Font.BOLD, 16));
         labelBaseDatosActual.setForeground(new Color(0, 100, 0));
         
-        panelEstado.setLayout(new FlowLayout());
-        panelEstado.add(labelTitulo);
-        panelEstado.add(labelBaseDatosActual);
+        // Panel para la fecha
+        JPanel panelFecha = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelFecha.setBackground(Color.WHITE);
+        JLabel labelFechaTitulo = new JLabel("Fecha del Servidor:");
+        labelFechaTitulo.setFont(new Font("Dialog", Font.BOLD, 14));
+        labelFecha = new JLabel("---");
+        labelFecha.setFont(new Font("Dialog", Font.PLAIN, 16));
+        labelFecha.setForeground(new Color(70, 70, 70));
+        
+        // Layout vertical para el panel de estado
+        panelEstado.setLayout(new BoxLayout(panelEstado, BoxLayout.Y_AXIS));
+        
+        // Panel para la base de datos
+        JPanel panelBD = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelBD.setBackground(Color.WHITE);
+        panelBD.add(labelTitulo);
+        panelBD.add(labelBaseDatosActual);
+        
+        panelFecha.add(labelFechaTitulo);
+        panelFecha.add(labelFecha);
+        
+        panelEstado.add(panelBD);
+        panelEstado.add(Box.createVerticalStrut(10)); // Espacio entre paneles
+        panelEstado.add(panelFecha);
         
         panelCentral.add(panelEstado, gbc);
         
@@ -167,6 +189,21 @@ public class DatabasePanel extends JPanel {
     private void actualizarEstado() {
         String baseDatosActual = databaseController.obtenerBaseDatosActual();
         labelBaseDatosActual.setText(baseDatosActual);
+        
+        // Actualizar la fecha si hay una base de datos activa
+        if (!baseDatosActual.equals("NINGUNA")) {
+            try {
+                String fechaActual = databaseController.obtenerFechaActual();
+                labelFecha.setText(fechaActual);
+                labelFecha.setForeground(new Color(0, 100, 0));
+            } catch (Exception e) {
+                labelFecha.setText("Error");
+                labelFecha.setForeground(Color.RED);
+            }
+        } else {
+            labelFecha.setText("---");
+            labelFecha.setForeground(Color.GRAY);
+        }
         
         // Actualizar color según la BD
         switch (baseDatosActual) {

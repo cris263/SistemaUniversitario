@@ -1,5 +1,6 @@
 package com.universidad.servicio;
 
+import com.universidad.factory.DAOFactory;
 import com.universidad.modelo.*;
 import com.universidad.persistencia.InscripcionDAO;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
 public class CursosInscritos implements Servicios {
 
     private List<Inscripcion> listado;
-    private InscripcionDAO inscripcionDAO = new InscripcionDAO();
+    private InscripcionDAO inscripcionDAO = DAOFactory.crearInscripcionDAO();
 
     public CursosInscritos() {
         this.listado = new ArrayList<>();

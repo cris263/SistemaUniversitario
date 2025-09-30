@@ -4,21 +4,29 @@ import java.sql.*;
 
 /**
  * Gestor simple para Oracle Database
- * Implementa la interfaz DatabaseManager de forma sencilla
+ * Implementa la interfaz DatabaseManager usando configuración externa
  */
 public class OracleDatabaseManager implements DatabaseManager {
     
-    private String url = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
-    private String user = "universidad_user";
-    private String pass = "universidad_pass";
+    private final String url;
+    private final String user;
+    private final String pass;
+    private final String driver;
+    
+    public OracleDatabaseManager() {
+        this.url = DatabaseConfig.getOracleUrl();
+        this.user = DatabaseConfig.getOracleUser();
+        this.pass = DatabaseConfig.getOraclePassword();
+        this.driver = DatabaseConfig.getOracleDriver();
+    }
     
     @Override
     public Connection getConnection() throws SQLException {
         try {
-            Class.forName("oracle.jdbc.OracleDriver");
+            Class.forName(driver);
             return DriverManager.getConnection(url, user, pass);
         } catch (ClassNotFoundException e) {
-            throw new SQLException("Driver Oracle no encontrado");
+            throw new SQLException("Driver Oracle no encontrado: " + driver);
         }
     }
     

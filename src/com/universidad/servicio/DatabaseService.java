@@ -2,14 +2,23 @@ package com.universidad.servicio;
 
 import com.universidad.persistencia.DatabaseFactory;
 import com.universidad.persistencia.DatabaseManager;
+import com.universidad.persistencia.DateDAO;
 
 /**
  * Servicio simple para gestionar operaciones de base de datos
- * Solo dos métodos: cambiar BD y saber cuál estamos usando
+ * Ahora incluye consulta de fecha actual
  */
 public class DatabaseService {
     
     private String currentDatabaseName;
+    private DateDAO dateDAO;
+    
+    /**
+     * Constructor
+     */
+    public DatabaseService() {
+        this.dateDAO = new DateDAO();
+    }
     
     /**
      * Cambiar a una base de datos específica
@@ -35,5 +44,13 @@ public class DatabaseService {
      */
     public String obtenerBaseDatosActual() {
         return DatabaseFactory.getActiveDatabaseName();
+    }
+    
+    /**
+     * Obtener la fecha actual de la base de datos
+     * @return String con la fecha formateada como YYYY-MM-DD
+     */
+    public String obtenerFechaActual() {
+        return dateDAO.getCurrentDate();
     }
 }

@@ -6,7 +6,7 @@ import com.universidad.persistencia.*;
  * Fábrica para crear y gestionar DAOs (Data Access Objects)
  * Implementa el patrón Singleton para cada DAO
  */
-public class DAOFactory implements InterfazFactory<DAOFactory.TipoDAO, Object> {
+public class DAOFactory implements GenericFactory<DAOFactory.TipoDAO, Object> {
     
     // Enum para tipos de DAO
     public enum TipoDAO {
@@ -81,6 +81,10 @@ public class DAOFactory implements InterfazFactory<DAOFactory.TipoDAO, Object> {
     public static CursoDAO crearCursoDAO() {
         return crearDAO(TipoDAO.CURSO, CursoDAO.class);
     }
+
+    public static CursoProfesorDAO crearCursoProfesorDAO() {
+        return crearDAO(TipoDAO.CURSO_PROFESOR, CursoProfesorDAO.class);
+    }
     
     public static PersonaDAO crearPersonaDAO() {
         return crearDAO(TipoDAO.PERSONA, PersonaDAO.class);
@@ -92,5 +96,8 @@ public class DAOFactory implements InterfazFactory<DAOFactory.TipoDAO, Object> {
     
     public static ProfesorDAO crearProfesorDAO() {
         return crearDAO(TipoDAO.PROFESOR, ProfesorDAO.class);
+    }
+    public static InscripcionDAO crearInscripcionDAO() {
+        return crearDAO(TipoDAO.INSCRIPCION, InscripcionDAO.class);
     }
 }

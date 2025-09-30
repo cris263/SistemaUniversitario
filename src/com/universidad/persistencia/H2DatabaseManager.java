@@ -4,21 +4,29 @@ import java.sql.*;
 
 /**
  * Gestor simple para H2 Database
- * Implementa la interfaz DatabaseManager de forma sencilla
+ * Implementa la interfaz DatabaseManager usando configuración externa
  */
 public class H2DatabaseManager implements DatabaseManager {
     
-    private String url = "jdbc:h2:mem:universidad;DB_CLOSE_DELAY=-1";
-    private String user = "sa";
-    private String pass = "";
+    private final String url;
+    private final String user;
+    private final String pass;
+    private final String driver;
+    
+    public H2DatabaseManager() {
+        this.url = DatabaseConfig.getH2Url();
+        this.user = DatabaseConfig.getH2User();
+        this.pass = DatabaseConfig.getH2Password();
+        this.driver = DatabaseConfig.getH2Driver();
+    }
     
     @Override
     public Connection getConnection() throws SQLException {
         try {
-            Class.forName("org.h2.Driver");
+            Class.forName(driver);
             return DriverManager.getConnection(url, user, pass);
         } catch (ClassNotFoundException e) {
-            throw new SQLException("Driver H2 no encontrado");
+            throw new SQLException("Driver H2 no encontrado: " + driver);
         }
     }
     

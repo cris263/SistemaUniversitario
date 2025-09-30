@@ -16,10 +16,8 @@ public class ExternalFactory {
         ESCRITORIO, CONSOLA
     }
     
-    // Pool de hilos para gestionar las interfaces
     private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
     
-    // Mapa para almacenar las instancias activas
     private static final Map<TipoInterfaz, InterfazUsuario> interfacesActivas = new HashMap<>();
     
     private static final Map<TipoInterfaz, Future<?>> hilosActivos = new HashMap<>();
@@ -56,7 +54,6 @@ public class ExternalFactory {
         return interfacesActivas.get(tipo);
     }
     
-
     public static void cerrarInterfaz(TipoInterfaz tipo) {
         InterfazUsuario interfaz = interfacesActivas.get(tipo);
         if (interfaz != null) {
@@ -71,43 +68,6 @@ public class ExternalFactory {
             interfacesActivas.remove(tipo);
             hilosActivos.remove(tipo);
         }
-    }
-    
-    public static void crearAmbasInterfaces() {
-        System.out.println("ExternalFactory: Creando interfaces de escritorio y consola simultáneamente");
-        
-        // Crear interfaz de escritorio en un hilo
-        crearInterfaz(TipoInterfaz.ESCRITORIO);
-        
-        // Pequeña pausa para evitar conflictos de inicialización
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        
-        // Crear interfaz de consola en otro hilo
-        crearInterfaz(TipoInterfaz.CONSOLA);
-        
-        System.out.println("ExternalFactory: Ambas interfaces creadas y ejecutándose en hilos separados");
-    }
-    
-    public static void mostrarEstado() {
-        System.out.println("\nESTADO DE LAS INTERFACES:");
-        System.out.println("=" + "=".repeat(40));
-        
-        for (TipoInterfaz tipo : TipoInterfaz.values()) {
-            InterfazUsuario interfaz = interfacesActivas.get(tipo);
-            Future<?> hilo = hilosActivos.get(tipo);
-            
-            if (interfaz != null) {
-                String estado = (hilo != null && !hilo.isDone()) ? " ACTIVA" : " INACTIVA";
-                System.out.println(String.format("%-12s: %s", tipo, estado));
-            } else {
-                System.out.println(String.format("%-12s:  NO CREADA", tipo));
-            }
-        }
-        System.out.println("=" + "=".repeat(40));
     }
     
     public static void cerrarTodo() {

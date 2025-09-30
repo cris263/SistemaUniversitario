@@ -4,21 +4,29 @@ import java.sql.*;
 
 /**
  * Gestor simple para MySQL Database
- * Implementa la interfaz DatabaseManager de forma sencilla
+ * Implementa la interfaz DatabaseManager usando configuración externa
  */
 public class MySQLDatabaseManager implements DatabaseManager {
     
-    private String url = "jdbc:mysql://localhost:3306/sistema_universitario?useSSL=false&allowPublicKeyRetrieval=true";
-    private String user = "universidad_user";
-    private String pass = "universidad_pass";
+    private final String url;
+    private final String user;
+    private final String pass;
+    private final String driver;
+    
+    public MySQLDatabaseManager() {
+        this.url = DatabaseConfig.getMySQLUrl();
+        this.user = DatabaseConfig.getMySQLUser();
+        this.pass = DatabaseConfig.getMySQLPassword();
+        this.driver = DatabaseConfig.getMySQLDriver();
+    }
     
     @Override
     public Connection getConnection() throws SQLException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName(driver);
             return DriverManager.getConnection(url, user, pass);
         } catch (ClassNotFoundException e) {
-            throw new SQLException("Driver MySQL no encontrado");
+            throw new SQLException("Driver MySQL no encontrado: " + driver);
         }
     }
     

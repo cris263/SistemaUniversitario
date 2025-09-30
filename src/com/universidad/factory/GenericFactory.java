@@ -6,7 +6,7 @@ package com.universidad.factory;
  * @param <T> Tipo de enum que define los tipos disponibles
  * @param <R> Tipo de objeto que produce la fábrica
  */
-public interface InterfazFactory<T extends Enum<T>, R> {
+public interface GenericFactory<T extends Enum<T>, R> {
     
     <U extends R> U crear(T tipo, Class<U> claseEsperada);
    

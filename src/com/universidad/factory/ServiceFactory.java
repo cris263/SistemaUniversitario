@@ -6,7 +6,7 @@ import com.universidad.servicio.*;
  * Fábrica para crear y gestionar servicios de negocio
  * Implementa el patrón Singleton para cada servicio
  */
-public class ServiceFactory implements InterfazFactory<ServiceFactory.TipoServicio, Object> {
+public class ServiceFactory implements GenericFactory<ServiceFactory.TipoServicio, Object> {
     
     // Enum para tipos de servicio
     public enum TipoServicio {

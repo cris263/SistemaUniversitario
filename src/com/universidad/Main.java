@@ -1,6 +1,7 @@
 package com.universidad;
 
 import com.universidad.factory.ExternalFactory;
+import com.universidad.factory.ExternalFactory.TipoInterfaz;
 import com.universidad.persistencia.DatabaseFactory;
 import com.universidad.persistencia.DatabaseManager;
 
@@ -33,7 +34,17 @@ public class Main extends JFrame {
 
         // Usar la fábrica para crear ambas interfaces
         System.out.println("Iniciando con ExternalFactory...");
-        ExternalFactory.crearAmbasInterfaces();
+        ExternalFactory.crearInterfaz(ExternalFactory.TipoInterfaz.ESCRITORIO);
+        
+        // Pequeña pausa para evitar conflictos de inicialización
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        // Crear interfaz de consola en otro hilo
+        ExternalFactory.crearInterfaz(ExternalFactory.TipoInterfaz.CONSOLA);
 
 
     }

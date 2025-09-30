@@ -1,5 +1,6 @@
 package com.universidad.servicio;
 
+import com.universidad.factory.DAOFactory;
 import com.universidad.modelo.CursoProfesor;
 import com.universidad.persistencia.CursoProfesorDAO;
 
@@ -13,7 +14,7 @@ public class CursosProfesores implements Servicios {
 
     public CursosProfesores() {
         this.listado = new ArrayList<>();
-        this.cursoProfesorDAO = new CursoProfesorDAO();
+        this.cursoProfesorDAO = DAOFactory.crearCursoProfesorDAO();
     }
 
     public void inscribir(CursoProfesor cursoProfesor) throws SQLException {

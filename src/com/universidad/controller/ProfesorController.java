@@ -1,6 +1,7 @@
 package com.universidad.controller;
 
 import com.universidad.dto.ProfesorDTO;
+import com.universidad.factory.DAOFactory;
 import com.universidad.mapper.ProfesorMapper;
 import com.universidad.modelo.Persona;
 import com.universidad.modelo.Profesor;
@@ -35,7 +36,7 @@ public class ProfesorController {
     }
     // Listar todos los profesores (usando ProfesorDAO)
     public List<ProfesorDTO> listarProfesores() throws SQLException {
-        com.universidad.persistencia.ProfesorDAO dao = new com.universidad.persistencia.ProfesorDAO();
+        com.universidad.persistencia.ProfesorDAO dao = DAOFactory.crearProfesorDAO();
         return dao.obtenerTodos().stream()
                 .map(ProfesorMapper::toDTO)
                 .collect(Collectors.toList());
