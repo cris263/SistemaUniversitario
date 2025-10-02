@@ -12,9 +12,9 @@ public class InscripcionesPersonas {
     private List<Persona> listado;
     private PersonaDAO personaDAO;
     
-    public InscripcionesPersonas() {
+    public InscripcionesPersonas(PersonaDAO personaDAO) {
         this.listado = new ArrayList<>();
-        this.personaDAO = DAOFactory.crearPersonaDAO();
+        this.personaDAO = personaDAO;
     }
     
     public void inscribir(Persona persona) throws SQLException {

@@ -16,13 +16,23 @@ public class PersonaPanel extends JPanel {
     private DefaultTableModel modeloTabla;
     private JTextField txtId, txtNombres, txtApellidos, txtEmail;
 
-    // Patrón para validar email
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
-    public PersonaPanel() {
-        this.controller = new PersonaController(this);
+    public PersonaPanel(PersonaController personaController) {
+        this.controller = personaController;
         setupUI();
-        controller.cargarPersonas();
+        cargarPersonas();
+    }
+    
+    private void cargarPersonas() {
+        try {
+            if (controller != null) {
+                List<PersonaDTO> personas = controller.cargarPersonas();
+                actualizarTabla(personas);
+            }
+        } catch (Exception ex) {
+            mostrarError("Error al cargar personas: " + ex.getMessage());
+        }
     }
 
     private void setupUI() {
@@ -139,7 +149,7 @@ public class PersonaPanel extends JPanel {
         btnActualizar.addActionListener(e -> actualizarPersona());
         btnEliminar.addActionListener(e -> eliminarPersona());
         btnLimpiar.addActionListener(e -> limpiarCampos());
-        btnRefrescar.addActionListener(e -> controller.cargarPersonas());
+        btnRefrescar.addActionListener(e -> cargarPersonas());
 
         panel.add(btnGuardar);
         panel.add(btnActualizar);
@@ -150,7 +160,6 @@ public class PersonaPanel extends JPanel {
         return panel;
     }
 
-    // Métodos que serán llamados por el controlador
     public void actualizarTabla(List<PersonaDTO> personas) {
         modeloTabla.setRowCount(0);
         for (PersonaDTO p : personas) {
@@ -192,7 +201,16 @@ public class PersonaPanel extends JPanel {
                 .email(txtEmail.getText().trim())
                 .build();
 
-        controller.guardarPersona(dto);
+        try {
+            boolean exito = controller.guardarPersona(dto);
+            if (exito) {
+                mostrarExito("Persona guardada correctamente");
+                limpiarCampos();
+                cargarPersonas();
+            }
+        } catch (Exception ex) {
+            mostrarError("Error al guardar: " + ex.getMessage());
+        }
     }
 
     private void actualizarPersona() {
@@ -209,8 +227,18 @@ public class PersonaPanel extends JPanel {
                 .email(txtEmail.getText().trim())
                 .build();
 
-        controller.actualizarPersona(dto);
+        try {
+            boolean exito = controller.actualizarPersona(dto);
+            if (exito) {
+                mostrarExito("Persona actualizada correctamente");
+                limpiarCampos();
+                cargarPersonas();
+            }
+        } catch (Exception ex) {
+            mostrarError("Error al actualizar: " + ex.getMessage());
+        }
     }
+    
     private void eliminarPersona() {
         int fila = tabla.getSelectedRow();
         if (fila < 0) {
@@ -219,9 +247,17 @@ public class PersonaPanel extends JPanel {
         }
 
         Long id = Long.parseLong(tabla.getValueAt(fila, 0).toString());
-        controller.eliminarPersona(id);
+        try {
+            boolean exito = controller.eliminarPersona(id);
+            if (exito) {
+                mostrarExito("Persona eliminada correctamente");
+                limpiarCampos();
+                cargarPersonas();
+            }
+        } catch (Exception ex) {
+            mostrarError("Error al eliminar: " + ex.getMessage());
+        }
     }
-
 
     private void cargarDatosSeleccionados() {
         int fila = tabla.getSelectedRow();

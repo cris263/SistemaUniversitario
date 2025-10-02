@@ -1,7 +1,6 @@
 package com.universidad.controller;
 
 import com.universidad.dto.CursoDTO;
-import com.universidad.factory.DAOFactory;
 import com.universidad.mapper.CursoMapper;
 import com.universidad.modelo.Curso;
 import com.universidad.persistencia.CursoDAO;
@@ -13,8 +12,8 @@ import java.util.stream.Collectors;
 public class CursoController {
     private final CursoDAO cursoDAO;
 
-    public CursoController() {
-        this.cursoDAO = DAOFactory.crearCursoDAO();
+    public CursoController(CursoDAO cursoDAO) {
+        this.cursoDAO = cursoDAO;
     }
 
     // Usar solo el metodo existe en tu dao actual

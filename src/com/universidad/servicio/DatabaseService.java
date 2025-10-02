@@ -16,8 +16,8 @@ public class DatabaseService {
     /**
      * Constructor
      */
-    public DatabaseService() {
-        this.dateDAO = new DateDAO();
+    public DatabaseService(DateDAO dateDAO) {
+        this.dateDAO = dateDAO;
     }
     
     /**

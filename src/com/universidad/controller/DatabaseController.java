@@ -13,8 +13,8 @@ public class DatabaseController {
     /**
      * Constructor
      */
-    public DatabaseController() {
-        this.databaseService = new DatabaseService();
+    public DatabaseController(DatabaseService databaseService) {
+        this.databaseService = databaseService;
     }
     
     /**

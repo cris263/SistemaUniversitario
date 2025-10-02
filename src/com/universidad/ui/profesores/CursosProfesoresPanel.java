@@ -13,10 +13,22 @@ public class CursosProfesoresPanel extends JPanel {
     private JTable tabla;
     private DefaultTableModel modeloTabla;
 
-    public CursosProfesoresPanel() {
-        this.controller = new CursoProfesorController(this);
+    public CursosProfesoresPanel(CursoProfesorController cursoProfesorController) {
+        // Necesitarás pasar el servicio CursosProfesores aquí
+        this.controller = cursoProfesorController;
         setupUI();
-        controller.cargarAsignaciones();
+        cargarAsignaciones();
+    }
+    
+    private void cargarAsignaciones() {
+        try {
+            if (controller != null) {
+                List<CursoProfesorDTO> asignaciones = controller.cargarAsignaciones();
+                actualizarTabla(asignaciones);
+            }
+        } catch (Exception ex) {
+            mostrarError("Error al cargar asignaciones: " + ex.getMessage());
+        }
     }
 
     private void setupUI() {
@@ -66,7 +78,7 @@ public class CursosProfesoresPanel extends JPanel {
         JButton btnAsignar = new JButton("➕ Asignar");
         JButton btnActualizar = new JButton("✏️ Actualizar");
 
-        btnRefrescar.addActionListener(e -> controller.cargarAsignaciones());
+        btnRefrescar.addActionListener(e -> cargarAsignaciones());
         btnEliminar.addActionListener(e -> eliminarAsignacion());
         btnAsignar.addActionListener(e -> abrirFormularioAsignar());
         btnActualizar.addActionListener(e -> abrirFormularioActualizar());
@@ -79,7 +91,6 @@ public class CursosProfesoresPanel extends JPanel {
         return panel;
     }
 
-    // MetODO CLAVE: Llamado por el controlador para actualizar la tabla
     public void actualizarTabla(List<CursoProfesorDTO> asignaciones) {
         modeloTabla.setRowCount(0);
 
@@ -109,7 +120,11 @@ public class CursosProfesoresPanel extends JPanel {
             int semestre = Integer.valueOf(tabla.getValueAt(fila, 5).toString());
 
             // Delegar al controlador
-            controller.eliminarAsignacion(profesorId, cursoId, anio, semestre);
+            boolean exito = controller.eliminarAsignacion(profesorId, cursoId, anio, semestre);
+            if (exito) {
+                mostrarExito("Asignación eliminada correctamente");
+                cargarAsignaciones();
+            }
         } catch (Exception ex) {
             mostrarError("Error al procesar eliminación: " + ex.getMessage());
         }
@@ -125,7 +140,7 @@ public class CursosProfesoresPanel extends JPanel {
             dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent e) {
-                    controller.cargarAsignaciones();
+                    cargarAsignaciones();
                 }
             });
         } catch (Exception ex) {
@@ -163,7 +178,7 @@ public class CursosProfesoresPanel extends JPanel {
             dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent e) {
-                    controller.cargarAsignaciones();
+                    cargarAsignaciones();
                 }
             });
         } catch (Exception ex) {
@@ -171,7 +186,6 @@ public class CursosProfesoresPanel extends JPanel {
         }
     }
 
-    // Métodos para mostrar mensajes - llamados por el controlador
     public void mostrarError(String mensaje) {
         JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }

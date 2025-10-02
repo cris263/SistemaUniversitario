@@ -12,9 +12,9 @@ public class CursosProfesores implements Servicios {
     protected List<CursoProfesor> listado;
     protected CursoProfesorDAO cursoProfesorDAO;
 
-    public CursosProfesores() {
+    public CursosProfesores(CursoProfesorDAO cursoProfesorDAO) {
         this.listado = new ArrayList<>();
-        this.cursoProfesorDAO = DAOFactory.crearCursoProfesorDAO();
+        this.cursoProfesorDAO = cursoProfesorDAO;
     }
 
     public void inscribir(CursoProfesor cursoProfesor) throws SQLException {

@@ -5,6 +5,7 @@ import com.universidad.factory.DAOFactory;
 import com.universidad.mapper.ProfesorMapper;
 import com.universidad.modelo.Persona;
 import com.universidad.modelo.Profesor;
+import com.universidad.persistencia.ProfesorDAO;
 import com.universidad.servicio.InscripcionesPersonas;
 
 import java.sql.SQLException;
@@ -14,8 +15,8 @@ import java.util.stream.Collectors;
 public class ProfesorController {
     private final InscripcionesPersonas servicioPersonas;
 
-    public ProfesorController() {
-        this.servicioPersonas = new InscripcionesPersonas();
+    public ProfesorController(InscripcionesPersonas inscripcionesPersonas) {
+        this.servicioPersonas = inscripcionesPersonas;
     }
 
     // Crear nuevo profesor
@@ -36,7 +37,7 @@ public class ProfesorController {
     }
     // Listar todos los profesores (usando ProfesorDAO)
     public List<ProfesorDTO> listarProfesores() throws SQLException {
-        com.universidad.persistencia.ProfesorDAO dao = DAOFactory.crearProfesorDAO();
+        com.universidad.persistencia.ProfesorDAO dao = new ProfesorDAO();
         return dao.obtenerTodos().stream()
                 .map(ProfesorMapper::toDTO)
                 .collect(Collectors.toList());

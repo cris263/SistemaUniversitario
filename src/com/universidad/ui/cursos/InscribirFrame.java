@@ -4,6 +4,7 @@ import com.universidad.controller.EstudianteController;
 import com.universidad.controller.CursoController;
 import com.universidad.dto.EstudianteDTO;
 import com.universidad.factory.ControllerFactory;
+import com.universidad.factory.ExternalFactory;
 import com.universidad.dto.CursoDTO;
 import com.universidad.persistencia.DatabaseFactory;
 
@@ -32,6 +33,7 @@ public class InscribirFrame extends JFrame {
     private Long cursoIdOriginal;
     private int anioOriginal;
     private int semestreOriginal;
+    ControllerFactory controllerFactory;
 
     public InscribirFrame() {
         this(false, null, null, 0, 0);
@@ -39,6 +41,7 @@ public class InscribirFrame extends JFrame {
 
     // Constructor compatible con tu código existente
     public InscribirFrame(boolean editar, Long estudianteId, Long cursoId, int anio, int semestre) {
+        this.controllerFactory = ExternalFactory.craeExternalFactory().crearControllerFactory();
         this.modoEdicion = editar;
         this.estudianteIdOriginal = estudianteId;
         this.cursoIdOriginal = cursoId;
@@ -46,8 +49,8 @@ public class InscribirFrame extends JFrame {
         this.semestreOriginal = semestre;
 
         // Inicializar controladores
-        this.estudianteController = ControllerFactory.crearEstudianteController();
-        this.cursoController = ControllerFactory.crearCursoController();
+        this.estudianteController = controllerFactory.crearEstudianteController();
+        this.cursoController = controllerFactory.crearCursoController();
 
         setTitle(editar ? "Actualizar Inscripción" : "Gestión de Universidad - Inscripciones");
         setSize(900, 650);

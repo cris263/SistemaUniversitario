@@ -1,51 +1,20 @@
 package com.universidad;
 
 import com.universidad.factory.ExternalFactory;
-import com.universidad.factory.ExternalFactory.TipoInterfaz;
 import com.universidad.persistencia.DatabaseFactory;
 import com.universidad.persistencia.DatabaseManager;
+import com.universidad.util.ThreadManager;
 
 import javax.swing.*;
 
 public class Main extends JFrame {
     public static void main(String[] args) {
-        try {
-            DatabaseManager db = DatabaseFactory.createDatabase("oracle");
-            boolean success = db.initialize();
+        DatabaseManager db = DatabaseFactory.createDatabase("h2");
+        db.initialize();
 
-            if (success) {
-                System.out.println("✅ " + db.getName() + " funciona correctamente");
-            } else {
-                System.out.println("❌ " + db.getName() + " tuvo problemas");
-            }
+        ExternalFactory extFactory = ExternalFactory.craeExternalFactory();
 
-        } catch (Exception e) {
-            System.err.println("❌ Error probando : " + e.getMessage());
-        }
-
-        // Agregar Shutdown Hook para Ctrl+C
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("\n🛑 Cerrando aplicación...");
-            ExternalFactory.cerrarTodo();
-            System.out.println("✅ Aplicación cerrada correctamente");
-        }));
-
-        // Verificar si hay argumentos de línea de comandos
-
-        // Usar la fábrica para crear ambas interfaces
-        System.out.println("Iniciando con ExternalFactory...");
-        ExternalFactory.crearInterfaz(ExternalFactory.TipoInterfaz.ESCRITORIO);
-        
-        // Pequeña pausa para evitar conflictos de inicialización
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        
-        // Crear interfaz de consola en otro hilo
-        ExternalFactory.crearInterfaz(ExternalFactory.TipoInterfaz.CONSOLA);
-
-
+        ThreadManager.crearHilo(extFactory.crearInterfazFactory().creaInterfaz("consola"));
+        ThreadManager.crearHilo(extFactory.crearInterfazFactory().creaInterfaz("escritorio"));
     }
 }

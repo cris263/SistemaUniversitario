@@ -10,6 +10,7 @@ public class InterfazEscritorio implements InterfazUsuario {
         System.out.println(" Inicializando interfaz de escritorio...");
         SwingUtilities.invokeLater(() -> {
             menuPrincipal = new Menu();
+            menuPrincipal.mainPanel();
             menuPrincipal.setTitle("Sistema Universitario - Modo Escritorio");
             menuPrincipal.setVisible(true);
         });

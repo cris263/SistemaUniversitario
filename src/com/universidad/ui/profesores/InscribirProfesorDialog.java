@@ -6,7 +6,7 @@ import com.universidad.controller.ProfesorController;
 import com.universidad.dto.CursoDTO;
 import com.universidad.dto.CursoProfesorDTO;
 import com.universidad.dto.ProfesorDTO;
-import com.universidad.factory.ControllerFactory;
+import com.universidad.factory.ExternalFactory;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -31,6 +31,7 @@ public class InscribirProfesorDialog extends JDialog {
     private boolean modoEdicion = false;
     private CursoProfesorDTO dtoOriginal;
 
+
     // Constructor para CREAR
     public InscribirProfesorDialog(JFrame parent, CursoProfesorController controller) {
         this(parent, controller, false, null);
@@ -40,10 +41,11 @@ public class InscribirProfesorDialog extends JDialog {
     public InscribirProfesorDialog(JFrame parent, CursoProfesorController controller,
                                    boolean editar, CursoProfesorDTO dtoParaEditar) {
         super(parent, editar ? "Actualizar Asignación Profesor" : "Asignar Profesor a Curso", true);
+        ExternalFactory externalFactory = ExternalFactory.craeExternalFactory();
 
         this.cursoProfesorController = controller;
-        this.profesorController = ControllerFactory.crearProfesorController();
-        this.cursoController = ControllerFactory.crearCursoController();
+        this.profesorController = externalFactory.crearControllerFactory().crearProfesorController();
+        this.cursoController = externalFactory.crearControllerFactory().crearCursoController();
         this.modoEdicion = editar;
         this.dtoOriginal = dtoParaEditar;
 
@@ -241,7 +243,15 @@ public class InscribirProfesorDialog extends JDialog {
                     .build();
 
             // Delegar al controlador
-            cursoProfesorController.asignarProfesor(nuevoDTO);
+            try {
+                boolean exito = cursoProfesorController.asignarProfesor(nuevoDTO);
+                if(exito){
+                    mostrarExito("Profesor asignado");
+                    cargarDatos();
+                }
+            } catch (Exception e) {
+                mostrarError("Error al asignar profesor");
+            }
 
             lblSeleccion.setText("Asignación creada: Profesor " + profesorId + " a Curso " + cursoId);
             limpiarFormulario();
@@ -260,14 +270,21 @@ public class InscribirProfesorDialog extends JDialog {
             int nuevoSemestre = Integer.parseInt(txtSemestre.getText().trim());
 
             // Delegar al controlador
-            cursoProfesorController.actualizarAsignacion(
-                    dtoOriginal.getProfesorId(),
-                    dtoOriginal.getCursoId(),
-                    dtoOriginal.getAnio(),
-                    dtoOriginal.getSemestre(),
-                    nuevoAnio,
-                    nuevoSemestre
-            );
+            try {     
+                boolean exito = cursoProfesorController.actualizarAsignacion(
+                        dtoOriginal.getProfesorId(),
+                        dtoOriginal.getCursoId(),
+                        dtoOriginal.getAnio(),
+                        dtoOriginal.getSemestre(),
+                        nuevoAnio,
+                        nuevoSemestre
+                );
+                if(exito){
+                    mostrarError("Asignacion actualizada");;
+                }
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
 
             dispose();
         } catch (NumberFormatException ex) {

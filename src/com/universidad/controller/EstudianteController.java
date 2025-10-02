@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 public class EstudianteController {
     private EstudianteDAO estudianteDAO;
 
-    public EstudianteController() {
-        this.estudianteDAO = DAOFactory.crearEstudianteDAO();
+    public EstudianteController(EstudianteDAO estudianteDAO) {
+        this.estudianteDAO = estudianteDAO;
     }
 
     // Usar EstudianteDAO directamente en lugar de InscripcionesPersonas

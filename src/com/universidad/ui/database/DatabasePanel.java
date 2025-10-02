@@ -14,8 +14,8 @@ public class DatabasePanel extends JPanel {
     private JLabel labelFecha;
     private JButton btnH2, btnMySQL, btnOracle;
     
-    public DatabasePanel() {
-        this.databaseController = new DatabaseController();
+    public DatabasePanel(DatabaseController databaseController) {
+        this.databaseController = databaseController;
         initComponents();
         actualizarEstado();
     }

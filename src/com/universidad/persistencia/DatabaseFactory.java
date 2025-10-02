@@ -95,11 +95,4 @@ public class DatabaseFactory {
         }
         return "NONE";
     }
-
-    public static void listAvailableTypes() {
-        System.out.println("📋 Tipos de base de datos disponibles:");
-        for (DatabaseType type : DatabaseType.values()) {
-            System.out.println("  - " + type.name());
-        }
-    }
 }

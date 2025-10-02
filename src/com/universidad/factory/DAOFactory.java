@@ -6,98 +6,34 @@ import com.universidad.persistencia.*;
  * Fábrica para crear y gestionar DAOs (Data Access Objects)
  * Implementa el patrón Singleton para cada DAO
  */
-public class DAOFactory implements GenericFactory<DAOFactory.TipoDAO, Object> {
+public class DAOFactory {
     
-    // Enum para tipos de DAO
-    public enum TipoDAO {
-        CURSO,
-        CURSO_PROFESOR,
-        ESTUDIANTE,
-        INSCRIPCION,
-        PERSONA,
-        PROFESOR
-    }
+    public DAOFactory(){}
     
-    /**
-     * Crea una instancia del DAO solicitado
-     * @param tipo Tipo de DAO a crear
-     * @param claseEsperada Clase esperada del DAO
-     * @return Instancia del DAO
-     */
-    @Override
-    public <U> U crear(TipoDAO tipo, Class<U> claseEsperada) {
-        
-        Object dao = null;
-        
-        switch (tipo) {
-            case CURSO:
-                dao = new CursoDAO();
-                break;
-                
-            case CURSO_PROFESOR:
-                dao = new CursoProfesorDAO();
-                break;
-                
-            case ESTUDIANTE:
-                dao = new EstudianteDAO();
-                break;
-                
-            case INSCRIPCION:
-                dao = new InscripcionDAO();
-                break;
-                
-            case PERSONA:
-                dao = new PersonaDAO();
-                break;
-                
-            case PROFESOR:
-                dao = new ProfesorDAO();
-                break;
-                
-            default:
-                throw new IllegalArgumentException("Tipo de DAO no soportado: " + tipo);
-        }
-        
-        // Verificar que sea del tipo esperado y hacer cast seguro
-        return claseEsperada.cast(dao);
-    }
-    
-    /**
-     * Obtiene los tipos de DAO soportados
-     */
-    @Override
-    public TipoDAO[] getTiposSoportados() {
-        return TipoDAO.values();
-    }
-    
-    /**
-     * Métodos de conveniencia para crear DAOs específicos (estáticos)
-     */
-    public static <T> T crearDAO(TipoDAO tipo, Class<T> claseEsperada) {
-        DAOFactory factory = new DAOFactory();
-        return factory.crear(tipo, claseEsperada);
-    }
-    
-    public static CursoDAO crearCursoDAO() {
-        return crearDAO(TipoDAO.CURSO, CursoDAO.class);
+    public CursoDAO crearCursoDAO() {
+        return new CursoDAO();
     }
 
-    public static CursoProfesorDAO crearCursoProfesorDAO() {
-        return crearDAO(TipoDAO.CURSO_PROFESOR, CursoProfesorDAO.class);
+    public CursoProfesorDAO crearCursoProfesorDAO() {
+        return new CursoProfesorDAO();
     }
     
-    public static PersonaDAO crearPersonaDAO() {
-        return crearDAO(TipoDAO.PERSONA, PersonaDAO.class);
+    public PersonaDAO crearPersonaDAO() {
+        return new PersonaDAO();
     }
     
-    public static EstudianteDAO crearEstudianteDAO() {
-        return crearDAO(TipoDAO.ESTUDIANTE, EstudianteDAO.class);
+    public EstudianteDAO crearEstudianteDAO() {
+        return new EstudianteDAO();
     }
     
-    public static ProfesorDAO crearProfesorDAO() {
-        return crearDAO(TipoDAO.PROFESOR, ProfesorDAO.class);
+    public ProfesorDAO crearProfesorDAO() {
+        return new ProfesorDAO();
     }
-    public static InscripcionDAO crearInscripcionDAO() {
-        return crearDAO(TipoDAO.INSCRIPCION, InscripcionDAO.class);
+    public InscripcionDAO crearInscripcionDAO() {
+        return new InscripcionDAO();
+    }
+
+    public DateDAO crearDateDAO(){
+        return new DateDAO();
     }
 }

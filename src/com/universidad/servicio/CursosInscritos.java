@@ -12,9 +12,10 @@ import java.util.Objects;
 public class CursosInscritos implements Servicios {
 
     private List<Inscripcion> listado;
-    private InscripcionDAO inscripcionDAO = DAOFactory.crearInscripcionDAO();
+    private InscripcionDAO inscripcionDAO ;
 
-    public CursosInscritos() {
+    public CursosInscritos(InscripcionDAO inscripcionDAO) {
+        this.inscripcionDAO = inscripcionDAO;
         this.listado = new ArrayList<>();
     }
 

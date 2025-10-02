@@ -13,12 +13,23 @@ public class CursosInscritosPanel extends JPanel {
     private JTable tabla;
     private DefaultTableModel modeloTablaCursosIns;
 
-    public CursosInscritosPanel() {
-        // Inicializar el controlador pasando esta vista
-        this.controller = new InscripcionController(this);
+    public CursosInscritosPanel(InscripcionController inscripcionController) {
+        // Necesitarás pasar el servicio CursosInscritos aquí
+        this.controller = inscripcionController;
         setupUI();
         // Cargar datos iniciales
-        controller.cargarInscripciones();
+        cargarInscripciones();
+    }
+    
+    private void cargarInscripciones() {
+        try {
+            if (controller != null) {
+                List<InscripcionDTO> inscripciones = controller.cargarInscripciones();
+                actualizarTabla(inscripciones);
+            }
+        } catch (Exception ex) {
+            mostrarError("Error al cargar inscripciones: " + ex.getMessage());
+        }
     }
 
     private void setupUI() {
@@ -69,7 +80,7 @@ public class CursosInscritosPanel extends JPanel {
         JButton btnActualizar = new JButton("✏️ Actualizar");
 
         // Conectar acciones con el controlador
-        btnRefrescar.addActionListener(e -> controller.cargarInscripciones());
+        btnRefrescar.addActionListener(e -> cargarInscripciones());
         btnEliminar.addActionListener(e -> eliminarInscripcion());
         btnCrear.addActionListener(e -> abrirFormularioCrear());
         btnActualizar.addActionListener(e -> abrirFormularioActualizar());
@@ -113,7 +124,11 @@ public class CursosInscritosPanel extends JPanel {
             int semestre = Integer.parseInt(tabla.getValueAt(fila, 5).toString());
 
             // Delegar al controlador
-            controller.eliminarInscripcion(cursoId, estudianteId, anio, semestre);
+            boolean exito = controller.eliminarInscripcion(cursoId, estudianteId, anio, semestre);
+            if (exito) {
+                mostrarExito("Inscripción eliminada correctamente");
+                cargarInscripciones();
+            }
         } catch (Exception ex) {
             mostrarError("Error al procesar eliminación: " + ex.getMessage());
         }
@@ -127,7 +142,7 @@ public class CursosInscritosPanel extends JPanel {
         inscribirFrame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {
-                controller.cargarInscripciones();
+                cargarInscripciones();
             }
         });
     }
@@ -151,7 +166,7 @@ public class CursosInscritosPanel extends JPanel {
             actualizarFrame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent e) {
-                    controller.cargarInscripciones();
+                    cargarInscripciones();
                 }
             });
         } catch (Exception ex) {
