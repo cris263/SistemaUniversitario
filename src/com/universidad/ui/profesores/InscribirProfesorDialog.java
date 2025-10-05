@@ -164,22 +164,19 @@ public class InscribirProfesorDialog extends JDialog {
     }
 
     private void cargarCursos() {
-        try {
-            List<CursoDTO> cursos = cursoController.listarCursosActivos();
-            DefaultTableModel model = (DefaultTableModel) cursosTable.getModel();
-            model.setRowCount(0);
+        List<CursoDTO> cursos = cursoController.listarCursos();
+        DefaultTableModel model = (DefaultTableModel) cursosTable.getModel();
+        model.setRowCount(0);
 
-            for (CursoDTO c : cursos) {
-                model.addRow(new Object[]{
-                        c.getId(),
-                        c.getNombre(),
-                        c.getActivo() ? "Sí" : "No"
-                });
-            }
-        } catch (SQLException ex) {
-            mostrarError("Error cargando cursos: " + ex.getMessage());
+        for (CursoDTO c : cursos) {
+            model.addRow(new Object[]{
+                    c.getId(),
+                    c.getNombre(),
+                    c.getActivo() ? "Sí" : "No"
+            });
         }
     }
+
 
     private JPanel crearPanelAsignacion() {
         JPanel panel = new JPanel(new GridBagLayout());

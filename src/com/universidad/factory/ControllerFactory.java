@@ -1,7 +1,8 @@
 package com.universidad.factory;
 
 import com.universidad.controller.*;
-
+import com.universidad.servicio.CursoManager;
+import com.universidad.ui.cursos.CursoConsolaObserver; // Ajusta si tu observer está en otro paquete
 
 /**
  * Fábrica para crear y gestionar controladores
@@ -11,25 +12,30 @@ public class ControllerFactory {
 
     private DAOFactory daoFactory;
     private ServiceFactory serviceFactory;
-    
-    public ControllerFactory(){
+
+    public ControllerFactory() {
         InternalFactory intFactory = InternalFactory.crearInternalFactory();
         this.daoFactory = intFactory.DAOs();
         this.serviceFactory = intFactory.services();
     }
-    
+
+    // --- CursoController usando CursoManager simplificado ---
     public CursoController crearCursoController() {
-        return new CursoController(daoFactory.crearCursoDAO());
+        CursoManager cursoManager = new CursoManager();
+        // Registrar observer opcional (consola)
+        cursoManager.attach(new CursoConsolaObserver());
+        return new CursoController(cursoManager);
     }
 
-    public EstudianteController crearEstudianteController(){
+    // --- Otros controladores se mantienen igual ---
+    public EstudianteController crearEstudianteController() {
         return new EstudianteController(daoFactory.crearEstudianteDAO());
     }
 
     public ProfesorController crearProfesorController() {
         return new ProfesorController(serviceFactory.crearInscripcionesPersonas());
     }
-    
+
     public DatabaseController crearDatabaseController() {
         return new DatabaseController(serviceFactory.crearDatabaseService());
     }
@@ -37,7 +43,7 @@ public class ControllerFactory {
     public InscripcionController crearInscripcionController() {
         return new InscripcionController(serviceFactory.crearCursosInscritos());
     }
-    
+
     public PersonaController crearPersonaController() {
         return new PersonaController(serviceFactory.crearInscripcionesPersonas());
     }

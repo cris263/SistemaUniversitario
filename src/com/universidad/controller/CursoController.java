@@ -1,47 +1,38 @@
 package com.universidad.controller;
 
 import com.universidad.dto.CursoDTO;
+import com.universidad.servicio.CursoManager;
 import com.universidad.mapper.CursoMapper;
-import com.universidad.modelo.Curso;
-import com.universidad.persistencia.CursoDAO;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CursoController {
-    private final CursoDAO cursoDAO;
+    private final CursoManager cursoManager;
 
-    public CursoController(CursoDAO cursoDAO) {
-        this.cursoDAO = cursoDAO;
+    public CursoController(CursoManager cursoManager) {
+        this.cursoManager = cursoManager;
     }
 
-    // Usar solo el metodo existe en tu dao actual
-    public List<CursoDTO> listarCursos() throws SQLException {
-        return cursoDAO.listarCursos().stream()
+    public CursoDTO crearCurso(String nombre) {
+        return CursoMapper.toDTO(cursoManager.crearCurso(nombre));
+    }
+
+    public void eliminarCurso(Long id) {
+        cursoManager.eliminarCurso(id);
+    }
+
+    public List<CursoDTO> listarCursos() {
+        return cursoManager.getCursos()
+                .stream()
                 .map(CursoMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<CursoDTO> listarCursosActivos() throws SQLException {
-        return cursoDAO.listarCursos().stream()
-                .filter(Curso::getActivo)
+    public List<CursoDTO> listarCursosActivos() {
+        return cursoManager.getCursosActivos()
+                .stream()
                 .map(CursoMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
-    // Métodos adicionales que podrías implementar después en el DAO
-    // public void crearCurso(CursoDTO cursoDTO) throws SQLException {
-    //     Curso curso = CursoMapper.toEntity(cursoDTO);
-    //     cursoDAO.guardarCurso(curso);
-    // }
-
-    // public void actualizarCurso(CursoDTO cursoDTO) throws SQLException {
-    //     Curso curso = CursoMapper.toEntity(cursoDTO);
-    //     cursoDAO.actualizarCurso(curso);
-    // }
-
-    // public void eliminarCurso(Long id) throws SQLException {
-    //     cursoDAO.eliminarCurso(id);
-    // }
 }
