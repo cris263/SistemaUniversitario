@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CursoManager {
+public class CursoManager implements ObservableCurso{
 
     private List<Curso> cursos;
     private List<ObservadorCurso> observadores;
@@ -41,7 +41,8 @@ public class CursoManager {
         observadores.remove(obs);
     }
 
-    private void notificar(String mensaje) {
+
+    public void notificar(String mensaje) {
         for (ObservadorCurso obs : observadores) {
             obs.actualizar(mensaje);
         }

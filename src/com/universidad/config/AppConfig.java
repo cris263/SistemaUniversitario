@@ -3,6 +3,7 @@ package com.universidad.config;
 import com.universidad.controller.CursoController;
 import com.universidad.servicio.CursoManager;
 import com.universidad.ui.cursos.CursoConsolaObserver;
+import com.universidad.ui.cursos.CursoUIAdapter;
 
 public class AppConfig {
 
@@ -10,8 +11,11 @@ public class AppConfig {
         // Creamos el manager
         CursoManager cursoManager = new CursoManager();
 
-        // Registrar observer
-        cursoManager.attach(new CursoConsolaObserver());
+        // Creamos el observer de UI
+        CursoConsolaObserver consolaObserver = new CursoConsolaObserver();
+
+        // Registramos usando el adaptador
+        cursoManager.attach(new CursoUIAdapter(consolaObserver));
 
         // Creamos el controlador
         return new CursoController(cursoManager);

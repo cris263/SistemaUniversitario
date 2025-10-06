@@ -3,7 +3,7 @@ package com.universidad.factory;
 import com.universidad.controller.*;
 import com.universidad.servicio.CursoManager;
 import com.universidad.ui.cursos.CursoConsolaObserver; // Ajusta si tu observer está en otro paquete
-
+import com.universidad.ui.cursos.CursoUIAdapter;
 /**
  * Fábrica para crear y gestionar controladores
  * Implementa el patrón Factory siguiendo la misma estructura que ServiceFactory
@@ -30,10 +30,16 @@ public class ControllerFactory {
     // --- CursoController usando CursoManager simplificado ---
     public CursoController crearCursoController() {
         CursoManager cursoManager = new CursoManager();
-        // Registrar observer opcional (consola)
-        cursoManager.attach(new CursoConsolaObserver());
+
+        // Observer de UI
+        CursoConsolaObserver consolaObserver = new CursoConsolaObserver();
+
+        // Registrar usando el adaptador
+        cursoManager.attach(new CursoUIAdapter(consolaObserver));
+
         return new CursoController(cursoManager);
     }
+
 
     // --- Otros controladores se mantienen igual ---
     public EstudianteController crearEstudianteController() {

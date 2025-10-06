@@ -13,3 +13,8 @@
     - Marcar `src/` como **Sources Root**.
 3. Abrir `src/com/universidad/Main.java` y ejecutar **Run 'Main.main()'**.
 
+## Como se implementa observer
+1. CursoManager actúa como observable implementando la interfaz ObservableCurso, notificando a los observadores (CursoConsolaObserver) cuando se crean o eliminan cursos.
+
+2. Curso sigue siendo solo la entidad de datos.
+   Esto permite que distintas partes del sistema reaccionen a cambios sin que la entidad de datos conozca a los observadores.

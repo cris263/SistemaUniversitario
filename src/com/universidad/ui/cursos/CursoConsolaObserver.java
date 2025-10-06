@@ -1,8 +1,6 @@
 package com.universidad.ui.cursos;
 
-import com.universidad.modelo.ObservadorCurso;
-
-public class CursoConsolaObserver implements ObservadorCurso {
+public class CursoConsolaObserver implements UIObserverCurso {
 
     @Override
     public void actualizar(String mensaje) {
