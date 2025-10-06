@@ -1,14 +1,5 @@
 package com.universidad.factory;
 
-import com.universidad.ui.InterfazUsuario;
-import com.universidad.ui.InterfazEscritorio;
-import com.universidad.ui.InterfazConsola;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 public class ExternalFactory {
 
     private static ExternalFactory externalFactory;
@@ -27,6 +18,6 @@ public class ExternalFactory {
     }
 
     public ControllerFactory crearControllerFactory() {
-        return new ControllerFactory();
+        return ControllerFactory.crearControllerFactory();
     }
 }

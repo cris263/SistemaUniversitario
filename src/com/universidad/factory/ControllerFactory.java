@@ -12,11 +12,19 @@ public class ControllerFactory {
 
     private DAOFactory daoFactory;
     private ServiceFactory serviceFactory;
+    private static ControllerFactory controllerFactory;
 
     public ControllerFactory() {
         InternalFactory intFactory = InternalFactory.crearInternalFactory();
         this.daoFactory = intFactory.DAOs();
         this.serviceFactory = intFactory.services();
+    }
+
+    public static ControllerFactory crearControllerFactory() {
+        if(controllerFactory == null){
+            controllerFactory = new ControllerFactory();
+        }
+        return controllerFactory;
     }
 
     // --- CursoController usando CursoManager simplificado ---

@@ -1,12 +1,12 @@
 package com.universidad.servicio;
 
-import com.universidad.persistencia.DatabaseFactory;
-import com.universidad.persistencia.DatabaseManager;
+import com.universidad.persistencia.DB;
+import com.universidad.persistencia.DatabaseInitializer;
 import com.universidad.persistencia.DateDAO;
 
 /**
- * Servicio simple para gestionar operaciones de base de datos
- * Ahora incluye consulta de fecha actual
+ * Servicio para gestionar operaciones de base de datos
+ * Usa DB.java para conexiones y DatabaseInitializer para inicialización
  */
 public class DatabaseService {
     
@@ -21,20 +21,34 @@ public class DatabaseService {
     }
     
     /**
-     * Cambiar a una base de datos específica
+     * Cambiar a una base de datos específica e inicializarla
      */
     public boolean cambiarBaseDatos(String nombreBaseDatos) {
         try {
-            DatabaseManager db = DatabaseFactory.createDatabase(nombreBaseDatos);
-            boolean success = db.initialize();
+            // Cambiar la base de datos activa
+            if (nombreBaseDatos.equalsIgnoreCase("mysql")) {
+                DB.setMySQL();
+            } else if (nombreBaseDatos.equalsIgnoreCase("h2")) {
+                DB.setH2();
+            } else if (nombreBaseDatos.equalsIgnoreCase("oracle")) {
+                DB.setOracle();
+            } else {
+                System.err.println("❌ Base de datos no soportada: " + nombreBaseDatos);
+                return false;
+            }
             
-            if (success) {
-                this.currentDatabaseName = nombreBaseDatos.toUpperCase();
+            // Inicializar tablas y datos
+            boolean initialized = DatabaseInitializer.initialize();
+            
+            if (initialized) {
+                this.currentDatabaseName = DB.getActiveDatabaseType();
                 return true;
             }
+            
             return false;
             
         } catch (Exception e) {
+            System.err.println("❌ Error cambiando base de datos: " + e.getMessage());
             return false;
         }
     }
@@ -43,13 +57,12 @@ public class DatabaseService {
      * Obtener el nombre de la base de datos actual
      */
     public String obtenerBaseDatosActual() {
-        return DatabaseFactory.getActiveDatabaseName();
+        if (currentDatabaseName == null) {
+            currentDatabaseName = DB.getActiveDatabaseType();
+        }
+        return currentDatabaseName;
     }
     
-    /**
-     * Obtener la fecha actual de la base de datos
-     * @return String con la fecha formateada como YYYY-MM-DD
-     */
     public String obtenerFechaActual() {
         return dateDAO.getCurrentDate();
     }

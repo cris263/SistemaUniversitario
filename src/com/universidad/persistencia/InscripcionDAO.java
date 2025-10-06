@@ -6,6 +6,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para operaciones CRUD de Inscripcion
+ * Usa DB.java para conexiones dinámicas
+ */
 public class InscripcionDAO {
 
     // 🔹 Constructor vacío (no necesitas pasar connection)
@@ -13,14 +17,9 @@ public class InscripcionDAO {
 
     // 1️⃣ Guardar la inscripción (INSERT)
     public void inscribirCurso(Inscripcion inscripcion) throws SQLException {
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "INSERT INTO inscripcion (curso, estudiante, anio, semestre) VALUES (?, ?, ?, ?)";
-        try (Connection connection = dbManager.getConnection();
+        
+        try (Connection connection = DB.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, inscripcion.getCurso().getId());
             ps.setLong(2, inscripcion.getEstudiante().getId());
@@ -32,14 +31,9 @@ public class InscripcionDAO {
 
     // 2️⃣ Eliminar inscripción
     public void eliminar(Inscripcion inscripcion) throws SQLException {
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "DELETE FROM inscripcion WHERE curso = ? AND estudiante = ? AND anio = ? AND semestre = ?";
-        try (Connection connection = dbManager.getConnection();
+        
+        try (Connection connection = DB.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, inscripcion.getCurso().getId());
             ps.setLong(2, inscripcion.getEstudiante().getId());
@@ -51,15 +45,10 @@ public class InscripcionDAO {
 
     // 3️⃣ Actualizar inscripción
     public void actualizar(Inscripcion inscripcion, int nuevoAnio, int nuevoSemestre) throws SQLException {
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "UPDATE inscripcion SET anio = ?, semestre = ? " +
                      "WHERE curso = ? AND estudiante = ? AND anio = ? AND semestre = ?";
-        try (Connection connection = dbManager.getConnection();
+        
+        try (Connection connection = DB.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             // Nuevos valores
             ps.setInt(1, nuevoAnio);
@@ -79,12 +68,6 @@ public class InscripcionDAO {
     public List<Inscripcion> cargarDatos() throws SQLException {
         List<Inscripcion> inscripciones = new ArrayList<>();
         
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = """
             SELECT i.curso, i.estudiante, i.anio, i.semestre,
                    c.nombre AS curso_nombre,
@@ -95,7 +78,7 @@ public class InscripcionDAO {
             JOIN persona p ON e.id = p.id
         """;
 
-        try (Connection connection = dbManager.getConnection();
+        try (Connection connection = DB.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

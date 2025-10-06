@@ -1,9 +1,7 @@
 package com.universidad.controller;
 
 import com.universidad.dto.ProfesorDTO;
-import com.universidad.factory.DAOFactory;
 import com.universidad.mapper.ProfesorMapper;
-import com.universidad.modelo.Persona;
 import com.universidad.modelo.Profesor;
 import com.universidad.persistencia.ProfesorDAO;
 import com.universidad.servicio.InscripcionesPersonas;

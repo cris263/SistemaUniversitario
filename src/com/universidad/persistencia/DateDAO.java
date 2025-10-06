@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 
 /**
  * DAO para manejar operaciones de fecha según el motor de base de datos
+ * Usa DB.getConnection() que maneja la base de datos activa
  */
 public class DateDAO {
     
@@ -17,23 +18,17 @@ public class DateDAO {
      * @return String con la fecha formateada como YYYY-MM-DD
      */
     public String getCurrentDate() {
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
+        String dbType = DB.getActiveDatabaseType();
         
-        if (dbManager == null) {
-            // Si no hay base de datos activa, usar la fecha del sistema
-            return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        }
-        
-        try (Connection conn = dbManager.getConnection();
+        try (Connection conn = DB.getConnection();
              Statement stmt = conn.createStatement()) {
             
             String sql;
-            String dbName = dbManager.getName().toUpperCase();
             
             // Seleccionar la consulta SQL según el motor de base de datos
-            if (dbName.contains("ORACLE")) {
+            if ("Oracle".equalsIgnoreCase(dbType)) {
                 sql = "SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD') AS fecha FROM dual";
-            } else if (dbName.contains("MYSQL")) {
+            } else if ("MySQL".equalsIgnoreCase(dbType)) {
                 sql = "SELECT DATE_FORMAT(CURDATE(), '%Y-%m-%d') AS fecha";
             } else { // H2 u otros
                 sql = "SELECT FORMATDATETIME(CURRENT_DATE, 'yyyy-MM-dd') AS fecha";
@@ -45,7 +40,7 @@ public class DateDAO {
             }
             
         } catch (SQLException e) {
-            System.err.println("Error obteniendo fecha: " + e.getMessage());
+            System.err.println("❌ Error obteniendo fecha: " + e.getMessage());
         }
         
         // En caso de error, devolver fecha del sistema

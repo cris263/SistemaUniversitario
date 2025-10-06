@@ -6,16 +6,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para operaciones CRUD de Estudiante
+ * Usa DB.java para conexiones dinámicas
+ */
 public class EstudianteDAO {
     
     public List<Estudiante> listarEstudiantes() throws SQLException {
         List<Estudiante> estudiantes = new ArrayList<>();
-        
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
         
         String sql = """
             SELECT e.id, p.nombres, p.apellidos, p.email,
@@ -24,7 +22,7 @@ public class EstudianteDAO {
             JOIN persona p ON e.id = p.id
         """;
         
-        try (Connection conn = dbManager.getConnection();
+        try (Connection conn = DB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -53,14 +51,14 @@ public class EstudianteDAO {
      * H2/MySQL usan BOOLEAN, Oracle usa NUMBER(1)
      */
     private boolean getActivoValue(ResultSet rs, String columnName) throws SQLException {
-        DatabaseFactory.DatabaseType dbType = DatabaseFactory.detectActiveDatabase();
+        String dbType = DB.getActiveDatabaseType();
         
         switch (dbType) {
-            case H2:
-            case MYSQL:
+            case "H2":
+            case "MySQL":
                 return rs.getBoolean(columnName);
                 
-            case ORACLE:
+            case "Oracle":
                 // Oracle usa NUMBER(1) donde 1=true, 0=false
                 return rs.getInt(columnName) == 1;
                 

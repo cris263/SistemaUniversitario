@@ -1,5 +1,8 @@
 package com.universidad.factory;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import com.universidad.persistencia.*;
 
 /**
@@ -7,8 +10,29 @@ import com.universidad.persistencia.*;
  * Implementa el patrón Singleton para cada DAO
  */
 public class DAOFactory {
+
+    private static Connection connection;
     
-    public DAOFactory(){}
+    public DAOFactory() {
+        refreshConnection();
+    }
+    
+    /**
+     * Refrescar la conexión (llamar después de cambiar la BD)
+     */
+    public void refreshConnection() {
+        try {
+            // Cerrar conexión anterior si existe
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+            // Obtener nueva conexión
+            connection = DB.getConnection();
+            System.out.println("🔄 Conexión refrescada a: " + DB.getActiveDatabaseType());
+        } catch (SQLException e) {
+            System.err.println("❌ Error al refrescar conexión: " + e.getMessage());
+        }
+    }
     
     public CursoDAO crearCursoDAO() {
         return new CursoDAO();

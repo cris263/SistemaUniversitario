@@ -4,7 +4,7 @@ import javax.swing.JPanel;
 
 import com.universidad.factory.ControllerFactory;
 import com.universidad.factory.ExternalFactory;
-import com.universidad.ui.cursos.CursosInscritosPanel;
+import com.universidad.ui.cursos.CursosPanel;
 import com.universidad.ui.database.DatabasePanel;
 import com.universidad.ui.personas.PersonaPanel;
 import com.universidad.ui.profesores.CursosProfesoresPanel;
@@ -35,8 +35,8 @@ public class Tabs {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(245, 245, 245));
 
-        CursosInscritosPanel cursosInscritosPanel = new CursosInscritosPanel(controllerFactory.crearInscripcionController());
-        panel.add(cursosInscritosPanel, BorderLayout.CENTER);
+        CursosPanel cursosPanel = new CursosPanel(controllerFactory.crearCursoController());
+        panel.add(cursosPanel, BorderLayout.CENTER);
         return panel;
     }
 

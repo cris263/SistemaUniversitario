@@ -8,17 +8,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para operaciones CRUD de CursoProfesor
+ * Usa DB.java para conexiones dinámicas
+ */
 public class CursoProfesorDAO {
 
     public void guardarCursoProfesor(CursoProfesor cp) throws SQLException {
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "INSERT INTO curso_profesor (profesor, curso, anio, semestre) VALUES (?, ?, ?, ?)";
-        try (Connection conn = dbManager.getConnection();
+        
+        try (Connection conn = DB.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, cp.getProfesor().getId());
@@ -32,14 +31,9 @@ public class CursoProfesorDAO {
     }
 
     public void eliminarCursoProfesor(CursoProfesor cp) throws SQLException {
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "DELETE FROM curso_profesor WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
-        try (Connection conn = dbManager.getConnection();
+        
+        try (Connection conn = DB.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, cp.getProfesor().getId());
@@ -57,15 +51,10 @@ public class CursoProfesorDAO {
     }
 
     public void actualizarCursoProfesor(CursoProfesor original, CursoProfesor actualizado) throws SQLException {
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "UPDATE curso_profesor SET anio = ?, semestre = ? " +
                 "WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
-        try (Connection conn = dbManager.getConnection();
+        
+        try (Connection conn = DB.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, actualizado.getAnio());
@@ -87,12 +76,6 @@ public class CursoProfesorDAO {
     public List<CursoProfesor> obtenerTodos() throws SQLException {
         List<CursoProfesor> lista = new ArrayList<>();
         
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "SELECT cp.profesor, cp.curso, cp.anio, cp.semestre, " +
                 "p.nombres AS profesor_nombres, p.apellidos AS profesor_apellidos, " +
                 "p.email AS profesor_email, pr.tipo_contrato, " +
@@ -102,7 +85,7 @@ public class CursoProfesorDAO {
                 "JOIN persona p ON pr.id = p.id " +
                 "JOIN curso c ON cp.curso = c.id";
 
-        try (Connection conn = dbManager.getConnection();
+        try (Connection conn = DB.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 ResultSet rs = stmt.executeQuery()) {
 
@@ -140,12 +123,6 @@ public class CursoProfesorDAO {
     public List<CursoProfesor> obtenerPorProfesor(Long profesorId) throws SQLException {
         List<CursoProfesor> lista = new ArrayList<>();
         
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "SELECT cp.profesor, cp.curso, cp.anio, cp.semestre, " +
                 "p.nombres AS profesor_nombres, p.apellidos AS profesor_apellidos, " +
                 "p.email AS profesor_email, pr.tipo_contrato, " +
@@ -156,7 +133,7 @@ public class CursoProfesorDAO {
                 "JOIN curso c ON cp.curso = c.id " +
                 "WHERE cp.profesor = ?";
 
-        try (Connection conn = dbManager.getConnection();
+        try (Connection conn = DB.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, profesorId);
@@ -194,12 +171,6 @@ public class CursoProfesorDAO {
     public List<CursoProfesor> obtenerPorCurso(Long cursoId) throws SQLException {
         List<CursoProfesor> lista = new ArrayList<>();
         
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "SELECT cp.profesor, cp.curso, cp.anio, cp.semestre, " +
                 "p.nombres AS profesor_nombres, p.apellidos AS profesor_apellidos, " +
                 "p.email AS profesor_email, pr.tipo_contrato, " +
@@ -210,7 +181,7 @@ public class CursoProfesorDAO {
                 "JOIN curso c ON cp.curso = c.id " +
                 "WHERE cp.curso = ?";
 
-        try (Connection conn = dbManager.getConnection();
+        try (Connection conn = DB.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, cursoId);
@@ -246,16 +217,10 @@ public class CursoProfesorDAO {
     }
 
     public boolean existe(CursoProfesor cp) throws SQLException {
-        // Detectar qué base de datos usar
-        DatabaseManager dbManager = DatabaseFactory.getActiveDatabaseManager();
-        if (dbManager == null) {
-            throw new SQLException("No hay ninguna base de datos disponible");
-        }
-        
         String sql = "SELECT COUNT(*) FROM curso_profesor " +
                 "WHERE profesor = ? AND curso = ? AND anio = ? AND semestre = ?";
 
-        try (Connection conn = dbManager.getConnection();
+        try (Connection conn = DB.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, cp.getProfesor().getId());
@@ -275,14 +240,14 @@ public class CursoProfesorDAO {
      * H2/MySQL usan BOOLEAN, Oracle usa NUMBER(1)
      */
     private boolean getActivoValue(ResultSet rs, String columnName) throws SQLException {
-        DatabaseFactory.DatabaseType dbType = DatabaseFactory.detectActiveDatabase();
+        String dbType = DB.getActiveDatabaseType();
         
         switch (dbType) {
-            case H2:
-            case MYSQL:
+            case "H2":
+            case "MySQL":
                 return rs.getBoolean(columnName);
                 
-            case ORACLE:
+            case "Oracle":
                 // Oracle usa NUMBER(1) donde 1=true, 0=false
                 return rs.getInt(columnName) == 1;
                 
