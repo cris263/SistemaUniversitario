@@ -14,7 +14,6 @@
 3. Abrir `src/com/universidad/Main.java` y ejecutar **Run 'Main.main()'**.
 
 ## Como se implementa observer
-1. CursoManager actúa como observable implementando la interfaz ObservableCurso, notificando a los observadores (CursoConsolaObserver) cuando se crean o eliminan cursos.
-
-2. Curso sigue siendo solo la entidad de datos.
-   Esto permite que distintas partes del sistema reaccionen a cambios sin que la entidad de datos conozca a los observadores.
+1. CursoManager actúa como observable implementando ObservableCurso, notificando a los observadores registrados.
+2. La UI (CursoConsolaObserver) recibe notificaciones a través de CursoUIAdapter, manteniendo la separación de capas.
+3. Por lo tanto curso sigue siendo solo la entidad de datos, sin lógica de notificación.
